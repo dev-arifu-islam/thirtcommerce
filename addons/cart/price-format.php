@@ -13,6 +13,11 @@
 $settings = $GLOBALS['settings'];
 
 $currency_postion = setValue($settings, 'currency_postion', 'left');
+$currency_symbol = setValue($settings, 'currency_symbol', '$');
+if(strpos($currency_symbol, ' ') !== false)
+{
+	echo '<style>.price-sale-number, .price-old-number{padding: 0px 4px;}</style>';
+}
 ?>
 <?php if ($currency_postion == 'left') { ?>
 <style>

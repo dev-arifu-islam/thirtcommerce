@@ -25,13 +25,13 @@ design.store = {
 					if (data.responseText != '')
 					{
 						var art = eval ("(" + data.responseText + ")");
-						
+
 						if(art.content == '')
 						{
 							alert_text(lang.designer.datafound);
 							return false;
 						}
-						
+
 						if (item.type == 'vector')
 						{
 							var svg = encrypt_api.Base64.decode(art.content);
@@ -53,9 +53,9 @@ design.store = {
 			});
 		},
 		create: function(item){
-			$jd('.ui-lock').attr('checked', false);			
+			$jd('.ui-lock').attr('checked', false);
 			var o 			= {};
-			o.type 			= 'clipart';			
+			o.type 			= 'clipart';
 			o.upload 		= 0;
 			o.clipart_id 	= item.id;
 			o.clipar_type 	= 'store';
@@ -68,8 +68,8 @@ design.store = {
 			o.edit 			= true;
 			o.rotate 		= true;
 			o.confirmColor	= false;
-			
-			
+
+
 			if (item.type != 'vector')
 			{
 				o.file			= {};
@@ -81,19 +81,19 @@ design.store = {
 					o.height	= this.height;
 					if (this.width > 100)
 					{
-						o.width 	= 100;						
+						o.width 	= 100;
 						o.height 	= (100/this.width) * this.height;
 					}
-					o.change_color = 0;					
-						
+					o.change_color = 0;
+
 					jQuery(document).triggerHandler( "myitem.create.item.design", o);
-					
+
 					var src = 'data:image/PNG;base64,'+item.content;
 					var content = '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="'+o.width+'" height="'+o.height+'" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink">'
 								 + '<g><image x="0" y="0" width="'+o.width+'" height="'+o.height+'" preserveAspectRatio="none" xlink:href="'+src+'" /></g>'
 								 + '</svg>';
 					o.svg 		= jQuery.parseHTML(content);
-					
+
 					design.item.create(o);
 					$jd('#dg-myclipart').modal('hide');
 				}
@@ -109,7 +109,7 @@ design.store = {
 				o.art_key 		= item.art_key;
 				o.svg 			= jQuery.parseHTML(item.content);
 				design.item.create(o);
-				var elm = design.item.get();			
+				var elm = design.item.get();
 				var svg = elm.children('svg');
 				jQuery(svg[0]).removeAttr('style');
 				$jd('.modal').modal('hide');
@@ -146,9 +146,9 @@ design.store = {
 		ini: function(){
 			jQuery('.dag-store-ideas').show();
 			jQuery('.idea-store-detail').hide();
-			
+
 			var div 		= jQuery('.dag-store-ideas');
-			
+
 			var product 	= this.getProduct();
 			var imgs	 	= this.product(product);
 			if(div.html() != '')
@@ -159,7 +159,7 @@ design.store = {
 			else
 			{
 				var options = {};
-				
+
 				var type = jQuery('.idea-sort').data('type');
 				if (typeof type == 'undefined')
 				{
@@ -169,21 +169,21 @@ design.store = {
 				{
 					options.sort = type;
 				}
-				
+
 				options.keyword = jQuery('#idea-keyword').val();
-				
+
 				var tags = jQuery('.idea-keyword-related .keyword-tag');
 				if(tags.length > 0)
 				{
 					options.tags	= tags.text();
 				}
-				
+
 				var designer = jQuery('.idea-keyword-related .keyword-designer');
 				if(designer.length > 0)
 				{
 					options.designer	= designer.data('id');
 				}
-				
+
 				if(jQuery('.idea-viewed').length > 0)
 				{
 					options.viewed = 1;
@@ -203,7 +203,7 @@ design.store = {
 					data: {options: options},
 					complete: function(data) {
 						div.removeClass('loading');
-						
+
 						if(data.status == 200)
 						{
 							var ideas = eval ("(" + data.responseText + ")");
@@ -215,7 +215,7 @@ design.store = {
 							seft.data = ideas;
 							seft.idea(ideas.rows, imgs, product.areaDesign);
 						}
-						gridArt('.dag-store-ideas');
+						//gridArt('.dag-store-ideas');
 					}
 				});
 			}
@@ -225,7 +225,7 @@ design.store = {
 			var data = this.data.rows[id];
 			if(data != 'undefined')
 			{
-				
+
 				var tags = '';
 				if(typeof data.tags != 'undefined')
 				{
@@ -321,7 +321,7 @@ design.store = {
 					if (data.responseText != '')
 					{
 						var idea = eval ("(" + data.responseText + ")");
-						
+
 						if(idea.content == '')
 						{
 							alert_text(lang.designer.datafound);
@@ -334,13 +334,13 @@ design.store = {
 								ids.push(item.clipart_id);
 								item.clipar_type = 'store';
 								span.item.clipar_type = 'store';
-							}							
+							}
 						});
-						
+
 						jQuery(document).on('after.imports.item.design', function(event, span, item){
 							if(item.type == 'text' && item.fontFamily != '' && item.fontFamily != 'arial')
 							{
-								design.text.update('fontfamily', item.fontFamily); 
+								design.text.update('fontfamily', item.fontFamily);
 								design.text.baseencode(item.fontFamily, 'google', span);
 							}
 							else if(item.type == 'clipart' && typeof item.thumb != 'undefined' && item.thumb != '')
@@ -373,9 +373,9 @@ design.store = {
 						design.selectAll();
 						design.fitToAreaDesign();
 						design.mask(false);
-						
+
 						jQuery(document).triggerHandler( "after.added.idea.design", idea);
-						
+
 						setTimeout(function(){
 							design.ajax.getPrice();
 						}, 1000);
@@ -409,28 +409,28 @@ design.store = {
 			{
 				var zoom = 220/max_box_width;
 				this.products[product_id]	= [];
-				
+
 				var images 	= [], i=0,zIndex = 1;
 				jQuery('.labView.active .product-design img').each(function(){
 					images[i] 			= [];
 					images[i].src 		= jQuery(this).attr('src');
-					
+
 					var width 			= jQuery(this).css('width');
 					images[i].width		= parseFloat(width.replace('px', ''));
 					images[i].width		= images[i].width * zoom;
-					
+
 					var height 			= jQuery(this).css('height');
 					images[i].height 	= parseFloat(height.replace('px', ''));
 					images[i].height	= images[i].height * zoom;
-					
+
 					var	top 			= jQuery(this).css('top');
 					images[i].top 		= parseFloat(top.replace('px', ''));
 					images[i].top		= images[i].top * zoom;
-					
+
 					var left 			= jQuery(this).css('left');
 					images[i].left 		= parseFloat(left.replace('px', ''));
 					images[i].left		= images[i].left * zoom;
-					
+
 					images[i].zindex 	= jQuery(this).css('z-index');
 					if(images[i].zindex == 'auto')
 						images[i].zindex = zIndex;
@@ -438,32 +438,32 @@ design.store = {
 					zIndex++;
 				});
 				this.products[product_id].images = images;
-				
+
 				var div = jQuery('.labView.active .design-area');
 				var areaDesign = [];
 				var width 				= div.css('width');
 				areaDesign.width 		= parseFloat(width.replace('px', ''));
 				areaDesign.width		= areaDesign.width * zoom;
-				
+
 				var height 				= div.css('height');
 				areaDesign.height 		= parseFloat(height.replace('px', ''));
 				areaDesign.height		= areaDesign.height * zoom;
-				
+
 				var top 				= div.css('top');
 				areaDesign.top 			= parseFloat(top.replace('px', ''));
 				areaDesign.top			= areaDesign.top * zoom;
-				
+
 				var left 				= div.css('left');
 				areaDesign.left 		= parseFloat(left.replace('px', ''));
 				areaDesign.left			= areaDesign.left * zoom;
-				
+
 				areaDesign.zindex 		= div.css('z-index');
 				if(areaDesign.zindex == 'auto')
 					areaDesign.zindex	= zIndex;
-					
+
 				this.products[product_id].areaDesign = areaDesign;
 				this.products[product_id].zoom = zoom;
-				
+
 				return this.products[product_id];
 			}
 			else
@@ -496,9 +496,9 @@ design.store = {
 			}
 			return html;
 		},
-		categories: function(cate_id, parent_id, reload){		
+		categories: function(cate_id, parent_id, reload){
 			var categories	= this.data.categories;
-			
+
 			var rows = false;
 			var li = jQuery('.idea-breadcrumb li');
 			if(cate_id == 0)
@@ -511,7 +511,7 @@ design.store = {
 			{
 				if (typeof li[1] != 'undefined') jQuery(li[1]).remove();
 				if (typeof li[2] != 'undefined') jQuery(li[2]).remove();
-				
+
 				var category = categories[cate_id];
 				if(category.id != 'undefined')
 				{
@@ -520,7 +520,7 @@ design.store = {
 				if(typeof category.children != 'undefined')
 				{
 					rows = categories[cate_id].children;
-				}				
+				}
 			}
 			else
 			{
@@ -535,9 +535,9 @@ design.store = {
 					}
 				}
 			}
-			
+
 			parent_id = cate_id;
-			
+
 			html	= '';
 			if(rows != false)
 			{
@@ -624,7 +624,7 @@ design.store = {
 		},
 		ajax: function(product){
 			if(this.product_id == product_id) return false;
-			
+
 			if(jQuery('.store-main-options').css('display') == 'block')
 			{
 				setTimeout(function(){
@@ -652,12 +652,12 @@ design.store = {
 							return false;
 						}
 						seft.data = ideas;
-						
+
 						seft.categories(0, 0, false);
 						var imgs = seft.product(product);
 						seft.idea(ideas.rows, imgs, product.areaDesign);
 					}
-					gridArt('.dag-store-ideas');
+					//gridArt('.dag-store-ideas');
 				}
 			});
 		}
@@ -678,28 +678,28 @@ design.store = {
 			jQuery('#arts-pagination').css('display', 'none');
 			var div = jQuery('#dag-list-store-arts');
 			if (div.length == 0) return false;
-			
+
 			if(typeof reset != 'undefined' && reset == true)
 			{
 				div.html('').addClass('loading');
 			}
-			
+
 			var start = jQuery('#dag-list-store-arts .box-art').length;
-			
+
 			var options = {};
-			
+
 			var search = jQuery('.art-keyword-related .list-keyword-related .keyword-tag');
 			if (search.length > 0)
 			{
 				options.tags = search.text();
 			}
-			
+
 			var search = jQuery('.art-keyword-related .list-keyword-related .keyword-designer')
 			if (search.length > 0)
 			{
 				options.designer = search.data('id');
 			}
-			
+
 			var type = jQuery('.art-sort').data('type');
 			if (typeof type == 'undefined')
 			{
@@ -709,16 +709,16 @@ design.store = {
 			{
 				options.sort = type;
 			}
-			
+
 			if(jQuery('.art-viewed').length > 0)
 			{
 				options.viewed = 1;
 			}
-			
+
 			options.cate_id = jQuery('#store-cate_id').val();
-			
+
 			options.keyword = jQuery('#art-keyword').val();
-			
+
 			jQuery.ajax({
 				beforeSend: function(){
 					jQuery('#dg-cliparts .modal-body').css('opacity', '0.5');
@@ -735,7 +735,7 @@ design.store = {
 							design.store.art.add(arts);
 							jQuery('#store-pagination').css('display', 'block');
 						}
-						
+
 						if (Object.keys(arts).length < 29)
 						{
 							jQuery('#store-pagination').css('display', 'none');
@@ -744,7 +744,7 @@ design.store = {
 						{
 							jQuery('#store-pagination').css('display', 'block');
 						}
-						
+
 						if (typeof options.designer != 'undefined' || typeof options.tags != 'undefined' || options.keyword != '')
 						{
 							jQuery.ajax({
@@ -768,9 +768,9 @@ design.store = {
 		add: function(arts){
 			var div = jQuery('#dag-list-store-arts');
 			if (div.length == 0) return false;
-			
+
 			jQuery.each(arts, function(key, art){
-				
+
 				var box = document.createElement('div');
 					box.className = 'box-art';
 				var a = document.createElement('a');
@@ -786,7 +786,7 @@ design.store = {
 				var span = document.createElement('span');
 					span.className = 'art-price';
 					span.innerHTML = art.price;
-				
+
 				var span_zoom = document.createElement('span');
 					span_zoom.className = 'art-view';
 					span_zoom.setAttribute('onclick', 'design.store.art.view(this);');
@@ -801,7 +801,7 @@ design.store = {
 		view: function(e){
 			var div = jQuery('#dag-art-store-detail');
 			if (div.length == 0) return false;
-			
+
 			var a = jQuery(e).parents('.box-art').children('a');
 			if(typeof a[0] != 'undefined')
 			{
@@ -830,7 +830,7 @@ design.store = {
 						html += '<p>'+lang.store.designer+': <a href="javascript:void(0);" data-id="'+item.user_id+'" onclick="design.store.art.search(\'designer\', this);">'+item.username+'</a></p> ';
 					}
 					html += str_tags+'</div>'+'</div><button type="button" onclick="jQuery(\'#dag-art-store-detail\').hide(); jQuery(\'#dag-list-store-arts\').show();" class="btn btn-default btn-sm"><i class="fa fa-times" aria-hidden="true"></i></button>';
-								
+
 					div.html(html);
 					jQuery('#dag-art-store-detail').show();
 				}
@@ -889,7 +889,7 @@ design.store = {
 					if (data.responseText != '')
 					{
 						var keywords = eval ("(" + data.responseText + ")");
-						
+
 						var div = jQuery('.top-list-keyword');
 						if(keywords.length > 0)
 						{
@@ -900,7 +900,7 @@ design.store = {
 							}
 							jQuery('.top-keyword').show();
 						}
-					}					
+					}
 				}
 			});
 		}
@@ -919,7 +919,7 @@ design.store = {
 							jQuery('.main-clipart').removeClass('active');
 							jQuery('.dag-art-store').addClass('active');
 							var categories = eval ("(" + data.responseText + ")");
-							
+
 							var list = {};
 							jQuery.each(categories, function(key, cate){
 								list[cate.id] = {};
@@ -930,8 +930,8 @@ design.store = {
 							design.store.art.categories = list;
 							design.store.category.add(categories, 0);
 						}
-					},		
-				});	
+					},
+				});
 			}
 		},
 		add: function(categories, parent_id){
@@ -941,17 +941,17 @@ design.store = {
 				jQuery('#store-cate_id').val('0');
 				design.store.art.ini(true);
 			}
-			
+
 			if (typeof categories == 'undefined')
 			{
 				var categories = design.store.art.categories;
 				var li = jQuery('.main-clipart.active .art-breadcrumb li');
 				if (typeof li[2] != 'undefined') jQuery(li[2]).remove();
 				if (typeof li[1] != 'undefined') jQuery(li[1]).remove();
-			}			
-			
+			}
+
 			if (categories.length == 0) return false;
-			
+
 			var html = '';
 			jQuery.each(categories, function(key, value){
 				html = html + '<li><a href="javascript:void(0);" onclick="design.store.category.children('+value.id+', '+parent_id+')">'+value.title+'</a></li>';
@@ -962,9 +962,9 @@ design.store = {
 		children: function(id, parent_id){
 			var categories = design.store.art.categories;
 			if (categories.length == 0) return false;
-			
+
 			if (parent_id == 0 && typeof categories[id] == 'undefined') return false;
-			
+
 			if (parent_id == 0)
 			{
 				var data = categories[id].children;
@@ -994,7 +994,7 @@ design.store = {
 						}
 					});
 				}
-				
+
 				jQuery('#store-cate_id').val(id);
 			}
 			jQuery('#store-cate_id').val(id);
@@ -1015,7 +1015,10 @@ design.store = {
 			}
 			if(type == 'idea')
 			{
-				jQuery('.search-options').toggle('slow');
+				if (jQuery('.search-options').length)
+					jQuery('.search-options').toggle('slow');
+				else if (jQuery('#dag-store-idea-categories').length)
+					jQuery('#dag-store-idea-categories').toggle('slow');
 			}
 			else
 			{
@@ -1036,7 +1039,7 @@ design.store = {
 		{
 			jQuery('.dag-art-store').addClass('active');
 		}
-		
+
 		jQuery('.store-categories').hide();
 		if (id == 'store')
 		{
@@ -1057,7 +1060,7 @@ design.store = {
 		var id = jQuery(e).data('id');
 		if(id == 'undefined')
 			id = 'art';
-		
+
 		var txt = jQuery(e).text();
 		var type = jQuery(e).data('type');
 		jQuery('.'+id+'-sort').html(txt).data('type', type);
@@ -1092,6 +1095,7 @@ design.store = {
 			{
 				jQuery('.product-prices').append(button);
 			}
+			jQuery('#product-price, [onclick="design.ajax.addJs(this)"]').css('display', 'none');
 		},
 		categories: function(){
 			jQuery.ajax({
@@ -1101,7 +1105,7 @@ design.store = {
 					if (data.responseText != '')
 					{
 						var rows = eval ("(" + data.responseText + ")");
-						
+
 						var list = {};
 						jQuery.each(rows.categories, function(key, cate){
 							list[cate.id] = {};
@@ -1111,14 +1115,14 @@ design.store = {
 						});
 						design.store.admin.addCategory(list);
 					}
-				},		
+				},
 			});
 		},
 		addCategory: function(rows){
 			var div = jQuery('#design-ideas-categories');
 			jQuery.each(rows, function(id, cate){
 				div.append('<option value="'+id+'">'+cate.title+'</option>');
-			
+
 				if(typeof cate.children != 'undefined')
 				{
 					jQuery.each(cate.children, function(index, children){
@@ -1142,18 +1146,18 @@ design.store = {
 				return false;
 			}
 			info.title = jQuery('#idea_title').val();
-			
+
 			info.categories = jQuery('#design-ideas-categories').val();
-			
+
 			if(jQuery('#idea_description').val() == '')
 			{
 				alert('Please add design description');
 				return false;
 			}
 			info.description = jQuery('#idea_description').val();
-			
+
 			info.tags = jQuery('#idea_tags').val();
-			
+
 			var types = [];
 			var i = 0;
 			jQuery('.design_types').each(function(){
@@ -1212,9 +1216,9 @@ design.store = {
 			datas.description	= info.description;
 			datas.designer_id	= user_id;
 			datas.parent_id		= 0;
-			
+
 			jQuery(document).triggerHandler( "before.save.design", datas);
-			
+
 			design.mask(true);
 			jQuery.ajax({
 				url: siteURL + "ajax.php?type=saveDesign",
@@ -1224,7 +1228,7 @@ design.store = {
 			}).done(function( content ) {
 				var results = eval ("(" + content + ")");
 				design.mask(false);
-				
+
 				var data = {};
 				data.info = info;
 				data.thumb = imgNobg;
@@ -1259,7 +1263,7 @@ design.store = {
 						delete elm[0].item.field;
 				}
 				else
-				{				
+				{
 					jQuery('.idea-fields button').removeClass('active').html('<i class="fa fa-square-o"></i>');
 					jQuery(e).find('button').addClass('active').html('<i class="fa fa-check-square-o"></i>');
 					var field = {};
@@ -1307,7 +1311,7 @@ var encrypt_api = {
 				str = str + s;
 			}
 		}
-		
+
 		var key = key.toUpperCase();
 		for(var i=0; i<key.length; i++)
 		{
@@ -1317,7 +1321,7 @@ var encrypt_api = {
 				str = str + s;
 			}
 		}
-		
+
 		for(var i=0; i<_keyStr.length; i++)
 		{
 			var s = _keyStr.charAt(i);
@@ -1330,10 +1334,10 @@ var encrypt_api = {
 	},
 	strSVG: function(str, id){
 		var key = this.key(id);
-		
+
 		var obj = str.split('/');
 		var n = obj.length;
-		
+
 		var svg = '';
 		for(var i=0; i<n; i++)
 		{
@@ -1341,21 +1345,21 @@ var encrypt_api = {
 			svg = svg + s;
 		}
 		var output = this.Base64.decode(svg);
-		
+
 		return output;
 	},
 	svgStr: function(svg, id){
 		var key = this.key(id);
 		var str = this.Base64.encode(svg);
 		var n = str.length;
-		
+
 		var output = '';
 		for(var i=0; i<n; i++)
 		{
 			var s 	= str.charAt(i);
 			output 	= output +'/'+ key.indexOf(s);
 		}
-		
+
 		output	= output.substring(1, output.length);
 		return output;
 	},
@@ -1516,7 +1520,7 @@ if(typeof is_active_store != 'undefined')
 	jQuery(document).on('form.addtocart.design', function(event, datas){
 		var arts = [], i=0;
 		jQuery('#app-wrap .drag-item').each(function(){
-			if(typeof this.item.clipar_type != 'undefined')
+			if(this.item != undefined && typeof this.item.clipar_type != 'undefined')
 			{
 				arts[i] = this.item.clipart_id;
 				i++;
@@ -1538,7 +1542,7 @@ if(typeof is_active_store != 'undefined')
 			{
 				design.store.category.ini();
 				design.store.art.ini();
-				
+
 				if(jQuery('#dag-store-categories').css('display') == 'block')
 				{
 					setTimeout(function(){
@@ -1546,17 +1550,21 @@ if(typeof is_active_store != 'undefined')
 						design.store.category.show(button[0]);
 					}, 1500);
 				}
+			} else {
+				setTimeout(function(){
+					gridArt('#dag-list-store-arts');
+				}, 1000);
 			}
 		});
-		
-		jQuery('#art-keyword').keypress(function( event ) {	
+
+		jQuery('#art-keyword').keypress(function( event ) {
 			if ( event.which == 13 )
 			{
 				design.store.art.search('keyword');
 				event.preventDefault();
 			}
 		});
-		
+
 		jQuery('#idea-keyword').keypress(function( event ) {
 			if ( event.which == 13 )
 			{
@@ -1565,16 +1573,16 @@ if(typeof is_active_store != 'undefined')
 				event.preventDefault();
 			}
 		});
-		
+
 		setTimeout(function(){
 			design.store.art.keyword();
 		}, 1000);
-		
+
 		if(typeof add_idea != 'undefined')
 		{
 			design.store.admin.ini();
 		}
-		
+
 		if(jQuery('.idea-fields').length > 0)
 		{
 			if(jQuery('.idea-fields').length > 0 && jQuery('.layers-content').find('.idea-fields').length == 0)
@@ -1603,3 +1611,9 @@ if(typeof is_active_store != 'undefined')
 		}
 	});
 }
+
+jQuery(document).on('product.change.design', function(event, product) {
+	if (typeof add_idea != 'undefined' && add_idea == 1 && jQuery('[onclick="design.store.admin.view()"]').length) {
+		jQuery('#product-price, [onclick="design.ajax.addJs(this)"]').css('display', 'none');
+	}
+});

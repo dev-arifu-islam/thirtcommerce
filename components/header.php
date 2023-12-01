@@ -22,7 +22,7 @@ var user_id = '<?php echo (is_array($user) ? (isset($user['id']) ? $user['id'] :
 var currency_symbol = '<?php echo setValue($settings, 'currency_symbol', '$'); ?>';
 var parent_id = '<?php if (isset($_GET['parent'])) echo $_GET['parent']; else echo 0; ?>';
 var domain = '<?php echo $_SERVER['HTTP_HOST']; ?>';
-var urlDesign = '';	
+var urlDesign = '';
 </script>
 
 <!-- js of CMS -->
@@ -35,31 +35,38 @@ var urlDesign = '';
 <?php } ?>
 
 <script type="text/javascript">
-	<?php 
+	<?php
 	$min_order 			= setValue($product, 'min_order', 1);
 	$max_order 			= setValue($product, 'max_oder', 9999);
 	$site_upload_max 	= setValue($settings, 'site_upload_max', 10);
 	$site_upload_min 	= setValue($settings, 'site_upload_min', 0.05);
-	
+
 	$min_order	= (int) $min_order;
 	$max_order	= (int) $max_order;
 	if ($min_order < 1)
 		$min_order = 1;
-	
+
 	if ($max_order < $min_order)
 		$max_order = 9999;
-	
+
 	if ($site_upload_min < 0)
 		$site_upload_min = 0.05;
-	
+
 	if ($site_upload_max < 0)
 		$site_upload_max = 10;
-	
+
 	?>
 	var min_order = <?php echo $min_order; ?>;
+	var product_min_order = <?php echo $min_order; ?>;
 	var max_order = <?php echo $max_order; ?>;
 	var product_id = '<?php echo $product->id; ?>';
-	var print_type = '<?php echo setValue($product, 'print_type', 'screen'); ?>';
+	var print_type = '<?php echo setValue($product, 'print_type', ''); ?>';
+	var prints_confirm_colors = [];
+	<?php if (isset($prints_confirm_colors) && count ($prints_confirm_colors)) { ?>
+	<?php foreach ($prints_confirm_colors as $pcc) { ?>
+	prints_confirm_colors.push('<?php echo $pcc; ?>');
+	<?php } ?>
+	<?php } ?>
 	var uploadSize = [];
 	uploadSize['max']  = <?php echo $site_upload_max; ?>;
 	uploadSize['min']  = <?php echo $site_upload_min; ?>;

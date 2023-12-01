@@ -34,6 +34,7 @@ var lang = {
 	remove: '<?php echo lang('designer_team_remove'); ?>',
 	color_picker: '<?php echo lang('designer_color_picker'); ?>',
 	text_required: '<?php echo lang('designer_js_required'); ?>',
+	login_failed: '<?php echo lang('designer_user_login_failed_message') ?>',
 	upload:{
 		fileType: '<?php echo lang('designer_js_upload_filetype'); ?>',
 		minSize: '<?php echo lang('designer_js_upload_minsize'); ?>',

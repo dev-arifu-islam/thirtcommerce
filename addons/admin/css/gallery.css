@@ -14,20 +14,6 @@ ul#gallery-3d-images {
     padding: 5px;
     position: relative;
 }
-span.layer-title {
-    border: 1px solid #ddd;
-    background-color: #fff;
-    padding: 6px 8px;
-    width: 150px;
-    font-size: 12px;
-    border-radius: 3px;
-    display: inline-block;
-    cursor: text;
-}
-#store-gallery{
-        clear: both;
-    display: block;
-}
 #gallery-3d-images li a {
     float: left;
     border: 1px solid #ddd;
@@ -222,13 +208,6 @@ div#gallery-3d-content {
     min-height: 56px;
     display: inline-block;
     width: 100%;
-    float: left;
-}
-.panel-toggler span.gallery-layer-center {
-    padding-left: 6px;
-}
-.panel-toggler  .gallery-layer-center i{
-    margin-right: 6px;
 }
 .gallery-title {
     font-size: 18px;
@@ -311,7 +290,7 @@ a.gallery-thumb-btn {
 span.gallery-layer-left {
     display: inline-block;
     border-right: 1px solid #ddd;
-    padding: 12px;
+    padding: 11px 15px;
     font-size: 12px;
     color: #000;
     cursor: move;
@@ -322,7 +301,7 @@ span.gallery-layer-left {
     float: right;
     position: relative;
     top: 4px;
-    right: -4px;
+    right: -6px;
 }
 span.gallery-layer-center {
     display: inline-block;
@@ -337,19 +316,17 @@ span.gallery-layer-center {
 }
 span.gallery-layer-right {
     float: right;
-    padding: 0;
-    width: 60px;
+    border-left: 1px solid #ddd;
+    padding: 11px 10px;
+    width: 50px;
     text-align: center;
-    height: 40px;
 }
 .gallery-layer-right > a {
     color: #666;
-    width: 30px;
-    float: left;
-    margin: 0;
-    height: 100%;
-    padding: 11px 0px;
-    border-left: 1px solid #ddd;
+    padding-left: 4px;
+}
+.gallery-layer-right > a:first-child {
+    padding: 0px;
 }
 .gallery-layer.active {
     background: #f1f1f1;
@@ -1071,10 +1048,6 @@ display: none;
     opacity: 1;
     color: #ff0000;
     font-size: 16px;
-}
-.gallery-area > .ui-draggable {
-    z-index: 1000!important;
-    opacity: 0.5;
 }
 @media screen and (max-width: 1024px) {
     .gallery-slider-number > span{

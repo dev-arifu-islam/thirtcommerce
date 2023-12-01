@@ -1,0 +1,14 @@
+[user]
+    name = Ariful, islam
+    email = arifulislamsobuj31@gmail.com
+    password = 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
+[http]
+    sslVerify = false
+    proxy = 
+
+[push]
+    default = simple
+[credential]
+    helper = cache --timeout=360000000
+[core]
+    autocrlf = false

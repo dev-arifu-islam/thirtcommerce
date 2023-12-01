@@ -25,7 +25,6 @@ var undo_redo = {
 		dataDesign[i] = JSON.stringify(design.exports.vector());
 	},
 	items: function(i){
-		
 		if(i >= dataDesign.length) return;
 		jQuery('.labView.active .drag-item').each(function(){
 			var id = jQuery(this).attr('id');
@@ -62,6 +61,7 @@ var undo_redo = {
 	}
 };
 design.tools.undo = function(){
+	design.tools.zoom();
 	var n = dataDesign.length;
 	if(undo_redo_active < 0)
 	{
@@ -80,6 +80,7 @@ design.tools.undo = function(){
 	undo_redo.items(undo_redo_active);
 };
 design.tools.redo = function(){
+	design.tools.zoom();
 	var n = dataDesign.length;
 	n = n - 1;
 	if(undo_redo_active >= n)

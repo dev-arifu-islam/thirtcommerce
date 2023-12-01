@@ -9,13 +9,16 @@
 */
 if(isset($params['data']['variation_id']))
 {
-	$dg		= $GLOBALS['dg'];
+	if (isset($GLOBALS['dg']))
+		$dg		= $GLOBALS['dg'];
+	else
+		$dg = $params['dg'];
 	$price 	= $dg->openURL($dg->url().'wp-admin/admin-ajax.php?action=woo_products_variation&variation_id='.$params['data']['variation_id']);
 	if(is_numeric($price) && $price > 0)
 	{
 		$product = $params['product'];
 		$product->price = $price;
 		$GLOBALS['product'] = $product;
-	}	
+	}
 }
 ?>

@@ -1,5 +1,6 @@
+var confirm_close_windown = true;
 window.onbeforeunload = function(e) {
-	if(enableAutoImport == '1' )
+	if(enableAutoImport == '1' && confirm_close_windown == true)
 	{
 		var dialogText = 'Are you sure?';
 		e.returnValue = dialogText;
@@ -19,6 +20,7 @@ jQuery(document).on('ini.design', function(event) {
 		return false;
 	}
 	try {
+
 		var str  = localStorage.getItem('productId-' + product_id);
 		var href = location.href;
 		if(href.indexOf('user=') > 0 || href.indexOf('cart_id=') > 0)
@@ -27,13 +29,15 @@ jQuery(document).on('ini.design', function(event) {
 		}
 		if(str != undefined)
 		{
-			design.imports.vector(str);
-			if(design.isIE())
-			{
-				jQuery('.content-inner .drag-item svg').each(function() {
-					removeErrorAttrIE(jQuery(this));
-				});
-			}
+			setTimeout(function(){
+				design.imports.vector(str);
+				if(design.isIE())
+				{
+					jQuery('.content-inner .drag-item svg').each(function() {
+						removeErrorAttrIE(jQuery(this));
+					});
+				}
+			}, 1000);
 		}
 	}
 	catch (e)
@@ -75,6 +79,14 @@ jQuery(document).on('change.product.design', function(event, p) {
 	}
 });
 
+jQuery(document).on('after.addtocart.design, done.save.design', function(){
+	confirm_close_windown = false;
+});
+
+jQuery(document).on('update.design', function(){
+	confirm_close_windown = true;
+});
+
 var removeErrorAttrIE = function(svg) {
 	svg.find('*').each(function() {
 		if(this.nodeName == 'sodipodi:namedview')
@@ -105,3 +117,11 @@ var removeErrorAttrIE = function(svg) {
 		});
 	});
 };
+
+jQuery(document).on('after.addtocart.design', function(event, data) {
+	var content = data;
+	if (typeof enableAutoImport != 'undefined' && content.error == 0 && enableAutoImport == 1)
+	{
+		enableAutoImport = 0;
+	}
+});

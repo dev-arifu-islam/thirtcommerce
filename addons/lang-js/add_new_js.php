@@ -24,11 +24,11 @@ $printing_method = '';
 if (isset($product->print_type) && $product->print_type != '')
 {
 	$printing = $dg->getPrintingType($product->print_type);
-	
+
 	if ( isset($printing->price_type) )
 	{
 		$printing_method = $printing->price_type;
-	}		
+	}
 }
 
 // setting DPI of file upload
@@ -104,13 +104,14 @@ if(isset($product->design) && isset($product->design->change_bg))
 <script type="text/javascript">
 var change_bg_product = '<?php echo $change_bg_product; ?>';
 var min_order = <?php echo $min_order; ?>;
+var product_min_order = <?php echo $min_order; ?>;
 var max_order = <?php echo $max_order; ?>;
 var product_id = '<?php echo $product->id; ?>';
 var print_type = '<?php echo setValue($product, 'print_type', 'screen'); ?>';
 var uploadSize = [];
 uploadSize['max']  = <?php echo $site_upload_max; ?>;
 uploadSize['min']  = <?php echo $site_upload_min; ?>;
-	
+
 var addon_lang_js_design_blank = '<?php echo $addons->__('addon_lang_js_design_blank'); ?>';
 var printing_method = '<?php echo $printing_method; ?>';
 
@@ -121,11 +122,11 @@ var design_idea_id = '<?php echo $_GET['idea_id']; ?>';
 var max_box_width = 500;
 var max_box_height = 500;
 <?php if(isset($product->box_width) && $product->box_width != ''){ ?>
-	max_box_width = '<?php echo $product->box_width; ?>';	
+	max_box_width = '<?php echo $product->box_width; ?>';
 <?php } ?>
 
 <?php if(isset($product->box_height) && $product->box_height != ''){ ?>
-	max_box_height = '<?php echo $product->box_height; ?>';	
+	max_box_height = '<?php echo $product->box_height; ?>';
 <?php } ?>
 
 var change_photo_color = '<?php echo $change_photo; ?>';

@@ -3,5 +3,5 @@
 	$copyItemErrMes = $addons->__('addon_copyitem_errormes');
 ?>
 <script type="text/javascript">
-	var copyItemErrMes     = '<?php echo $copyItemErrMes; ?>';
+	var copyItemErrMes     = `<?php echo $copyItemErrMes; ?>`;
 </script>

@@ -62,3 +62,9 @@ hotkeys.bind(['command+x', 'ctrl+x'], function() {
 	design.item.unselect();
 	return false;
 });
+function scrolltoTop(e)
+{
+	jQuery('#dg-obj-clipart .option-panel-content').animate({
+        scrollTop: 0
+    }, 500);
+}

@@ -1,4 +1,9 @@
-<?php
+<?php 
+
+if (!is_dir(ROOT.DS.'data'.DS.'import')) {
+    @mkdir(ROOT.DS.'data'.DS.'import', 0755, true);
+}
+
 $settings = $dg->getSetting();
 if(isset($settings->store))
 {
@@ -39,8 +44,51 @@ if(isset($settings->store))
 				
 				$options['clipart_shop'] = $clipart_shop;
 
+				if(isset($options['cate_id']) && $options['cate_id'] == 0 && isset($_POST['clipart_cate'][0]))
+					$options['cate_id'] = $_POST['clipart_cate'][0];
+
 				$store->dg 	= $dg;
 				$data = $store->arts($start, $options);
+				if( isset($_POST['clipart_cate']) && try_to_count($_POST['clipart_cate']) > 0 )
+				{
+					$clipart_cate = $_POST['clipart_cate'];
+					$path_cate = ROOT .DS. 'data' .DS. 'store' .DS. 'art_categories.json';
+					if (file_exists($path_cate))
+					{
+						$str				= file_get_contents($path_cate);
+						$clipart_categories = json_decode($str, true);
+						$chilcate = array();
+						foreach($clipart_categories as $val)
+						{
+							if(in_array($val['id'], $clipart_cate) && isset($val['children']) && try_to_count($val['children']))
+							{
+								foreach($val['children'] as $v)
+								{
+									$chilcate[] = $v['id'];
+								}
+							}
+						}
+						foreach($clipart_cate as $vl)
+						{
+							$chilcate[] = $vl;
+						}
+
+						$clipart_cate = $chilcate;
+					}
+					
+					if( try_to_count($data) )
+					{
+						$array = array();
+						foreach ($data as $i => $art) {
+							if( in_array($art['cate_id'], $clipart_cate) )
+							{
+								$array[] = $art;
+							}
+						}
+						$arts = $array;
+					}
+					$data = $arts;
+				}
 				break;
 			
 			case 'viewed': // get art
@@ -94,7 +142,7 @@ if(isset($settings->store))
 				if(isset($_POST['options']))
 				{
 					$data 	= $store->ideas($data, $_POST['options']);
-					if(isset($data['rows']) && count($data['rows']) > 0)
+					if(isset($data['rows']) && try_to_count($data['rows']) > 0)
 					{
 						$rows = array();
 						foreach($data['rows'] as $row)
@@ -145,7 +193,7 @@ if(isset($settings->store))
 				if(file_exists($file))
 				{
 					$designs 	= json_decode(file_get_contents($file), true);
-					if( count($designs) )
+					if( try_to_count($designs) )
 					{
 						$rows 	= $store->getData('ideas');
 						foreach($designs as $id => $design)
@@ -167,7 +215,7 @@ if(isset($settings->store))
 				if(file_exists($file))
 				{
 					$designs 	= json_decode(file_get_contents($file), true);
-					if( count($designs) )
+					if( try_to_count($designs) )
 					{
 						$arts 		= $store->getData('arts');
 						$arts_info 	= $store->getData('arts_info');
@@ -247,8 +295,8 @@ if(isset($settings->store))
 				}
 				break;
 			case 'createDesign':
-				$info 		= $_POST['info'];
-				$thumb 		= $_POST['thumb'];
+				$info 			= $_POST['info'];
+				$thumb 			= $_POST['thumb'];
 				$user_id 		= $_POST['user_id'];
 				$design_id 		= $_POST['design_id'];
 				$design_file 	= $_POST['design_file'];
@@ -301,7 +349,7 @@ if(isset($settings->store))
 				
 				//update types
 				$types	= $info['types'];
-				if(count($types))
+				if(try_to_count($types))
 				{
 					$rows = $store->getData('ideas_types');
 					foreach($types as $type_id)
@@ -317,7 +365,7 @@ if(isset($settings->store))
 				
 				// update categories
 				$categories	= $info['categories'];
-				if(count($categories))
+				if(try_to_count($categories))
 				{
 					$rows = $store->getData('cate_ideas');
 					foreach($categories as $cate_id)

@@ -74,7 +74,7 @@
 										jQuery(elm).data('upload', 1);
 										jQuery(document).triggerHandler( "added.uploaded", elm);
 										design.ajax.getPrice();
-									}, 100);
+									}, 1000);
 								});
 								jQuery(span).trigger( "click" );
 								jQuery(progressBarContainer).addClass('uploaded');
@@ -83,10 +83,6 @@
 							else
 							{
 								alert(media.msg);
-							}
-							if(jQuery('#upload-copyright').length > 0)
-							{
-								jQuery('#upload-copyright').attr('checked', false);
 							}
 							jQuery('#remove-bg').attr('checked', false);
 							jQuery('#files-upload').val('');
@@ -124,7 +120,7 @@
 							jQuery(elm).data('upload', 1);
 							jQuery(document).triggerHandler( "added.uploaded", elm);
 							design.ajax.getPrice();
-						}, 100);
+						}, 1000);
 					});
 					jQuery(span).trigger( "click" );
 					jQuery(progressBarContainer).addClass('uploaded');
@@ -135,10 +131,6 @@
 					alert(file.msg);
 				}
 				jQuery('#iframe').remove();
-				if(jQuery('#upload-copyright').length > 0)
-				{
-					jQuery('#upload-copyright').attr('checked', false);
-				}
 				jQuery('#remove-bg').attr('checked', false);
 				jQuery('#files-upload').val('');
 			});	
@@ -205,7 +197,7 @@
 								jQuery(elm).data('upload', 1);
 								jQuery(document).triggerHandler( "added.uploaded", elm);
 								design.ajax.getPrice();
-							}, 100);
+							}, 1000);
 						});
 						jQuery(span).trigger( "click" );
 					}
@@ -213,10 +205,6 @@
 					{
 						alert(media.msg)
 					}
-				}
-				if(jQuery('#upload-copyright').length > 0)
-				{
-					jQuery('#upload-copyright').attr('checked', false);
 				}
 				jQuery('#remove-bg').attr('checked', false);
 				jQuery('#files-upload').val('');
@@ -319,17 +307,7 @@ jQuery(document).ready(function($) {
 			a.className = '';
 			a.setAttribute('href', 'javascript:void(0)');
 			a.innerHTML = '<img class="img-thumbnail" draggable="true" src="'+file.thumb+'" alt="">';
-			a.item 	= file;
-			jQuery(a).click(function(event) {
-				design.myart.create(this);
-				setTimeout(function(){
-					var elm = design.item.get();
-					jQuery(elm).addClass('drag-item-upload');
-					jQuery(elm).data('upload', 1);
-					jQuery(document).triggerHandler( "added.uploaded", elm);
-					design.ajax.getPrice();
-				}, 200);
-			});
+			a.item 			= file;
 			div.item 		= file;
 			div.item.thumb 	= siteURL + file.thumb;
 			div.item.width 	= file.size.width;
@@ -339,5 +317,17 @@ jQuery(document).ready(function($) {
 			jQuery('#dag-files-images').append(div);
 		});
 		gridArt('#dag-files-images');
+		jQuery('#dag-files-images .box-art').on('click', function(e) {
+			var span = document.createElement('span');
+			span.item = this.item;
+			design.myart.create(span);
+			setTimeout(function(){
+				var elm = design.item.get();
+				jQuery(elm).addClass('drag-item-upload');
+				jQuery(elm).data('upload', 1);
+				jQuery(document).triggerHandler( "added.uploaded", elm);
+				design.ajax.getPrice();
+			}, 800);
+		});
 	}
 });

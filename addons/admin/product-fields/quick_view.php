@@ -1,4 +1,12 @@
-<div class="form-group" style="display: none;">
+<?php
+
+include_once(ROOT.DS.'includes'.DS.'functions.php');
+$dg = new dg();
+
+if ($dg->platform == 'wordpress') {
+?>
+<hr />
+<div class="form-group">
 	<div class="col-sm-12">
 		<label class="checkbox-inline">
 			<?php if(isset($data->hide_quickview) && $data->hide_quickview == 1) { ?>
@@ -10,3 +18,5 @@
 		</label>
 	</div>
 </div>
+
+<?php } ?>

@@ -20,14 +20,14 @@ $addons = $GLOBALS['addons'];
 									<label for="fields"><?php echo lang('designer_right_choose_product_color'); ?></label>
 									<div class="list-colors" id="product-list-colors">
 										
-										<?php for ($i=0; $i<count($product->design->color_hex); $i++) { ?>
+										<?php for ($i=0; $i<try_to_count($product->design->color_hex); $i++) { ?>
 										<span class="bg-colors dg-tooltip <?php if ($i==0) echo 'active'; ?>" onclick="design.products.changeColor(this, <?php echo $i; ?>)" data-color="<?php echo $product->design->color_hex[$i]; ?>" data-placement="top" data-original-title="<?php echo $product->design->color_title[$i]; ?>">
 											
 											<?php 
 												$colors_hex = explode(';', $product->design->color_hex[$i]);
 												$span_with = (34/count($colors_hex));
 											?>
-											<?php for($jc=0; $jc<count($colors_hex); $jc++) { ?>
+											<?php for($jc=0; $jc<try_to_count($colors_hex); $jc++) { ?>
 												<a href="javascript:void(0);" style="width:<?php echo $span_with; ?>px; background-color:#<?php echo $colors_hex[$jc]; ?>"></a>
 											<?php } ?>
 										</span>

@@ -1,5 +1,5 @@
 jQuery(document).ready(function(){
-	jQuery( ".size-number" ).spinner({
+	jQuery( "#product-attributes .size-number" ).spinner({
 		min: 0,
 		start: function(){
 			return design.team.changeSize();
@@ -116,7 +116,7 @@ function update_attributes(attr_options)
 	}
 }
 jQuery(document).on('product.change.design', function(evt, product) {
-	jQuery( ".size-number" ).spinner({
+	jQuery( "#product-attributes .size-number" ).spinner({
 		min: 0,
 		start: function(){
 			return design.team.changeSize();

@@ -34,16 +34,16 @@ jQuery(document).on("select.item.design", function(event, ele){
 /** function copy item */
 design.tools.copy = function(e) {
 	var item = design.item.get();
-	/* case don't have item selected */
+	// case don't have item selected
 	if(item.length == 0) 
 	{
 		return;
 	}
-	var item_c = item[0].item;
+	var item_c = {};
 	var type   = item.data('type');
 	var iStyle,	bStyle,	uStyle,	alignL,	alignC,	alignR,	outlineC, outlineW;
 	jQuery(document).triggerHandler( "before.copy.design", type);
-	/* case item is limited */
+	// case item is limited
 	if(!allowCopyFlg) 
 	{
 		return;
@@ -60,6 +60,14 @@ design.tools.copy = function(e) {
 	else 
 	{
 		item_c.remove = false;
+	}
+	if(item.find('div.item-edit-on').length > 0) 
+	{
+		item_c.edit = true;
+	}
+	else 
+	{
+		item_c.edit = false;
 	}
 	if(item.find('div.item-rotate-on').length > 0) 
 	{
@@ -112,30 +120,6 @@ design.tools.copy = function(e) {
 	if(type == 'team') 
 	{
 		return;
-	}
-	var html = item_c.svg.html();
-	if(html.indexOf('id="') != -1)
-	{
-		var index = html.indexOf('id="');
-		var start_id = parseInt(index) + 4;
-		var end_id = start_id + 40;
-		var str = html.substring(start_id, end_id);
-		var index = str.indexOf('"');
-		if(index != -1)
-		{
-			var old_id = str.substring(0, index);
-			var ids = html.split(old_id);
-			if(ids.length > 0)
-			{
-				var new_id 	= 'copy-'+parseInt((Math.random() * 100000000));
-				var new_html = html;
-				for(i=0; i<ids.length; i++)
-				{
-					new_html = new_html.replace(old_id, new_id);
-				}
-				item_c.svg.innerHTML = new_html;
-			}
-		}
 	}
 	design.item.create(item_c);
 	var itemN = design.item.get();

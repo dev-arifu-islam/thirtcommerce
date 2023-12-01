@@ -2,8 +2,7 @@ design.text.sizes = {
 	set: function(e, item){
 		var sizes = item.fontSize;
 		var new_h = jQuery(e).outerHeight();
-		var tspan = jQuery(e).find('tspan');
-		new_h = new_h/tspan.length;
+
 		var fontSize = (new_h * sizes.size)/sizes.height;
 		this.update(fontSize);
 	},
@@ -21,11 +20,9 @@ design.text.sizes = {
 			var sizes = item.fontSize;
 			var new_h = Math.round((size * sizes.height)/sizes.size);
 			var old_h = items.outerHeight();
-			var tspan = items.find('tspan');
-			old_h = old_h / tspan.length;
 			var old_w = items.outerWidth();
 			var new_w = Math.round((old_w * new_h)/old_h);
-			this.updateText(items, new_w, new_h * tspan.length);
+			this.updateText(items, new_w, new_h);
 		}
 	},
 	change: function(e){

@@ -204,4 +204,4 @@ if(check_dpi == 1)
 			jQuery('#dg-wapper').append('<div class="error-message">'+addon_photo_size_msg+'</div>');
 		}
 	});
-}
+};

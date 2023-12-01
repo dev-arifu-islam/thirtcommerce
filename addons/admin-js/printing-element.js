@@ -87,19 +87,19 @@ jQuery(document).on('price.addtocart.design', function(event, data){
 	var price = '';
 	if (typeof data.item != 'undefined')
 	{
-		price = '<span>'+data.item+' / '+lang.text.clipart_item+'</span>';
+		price = '<span class="badge"><small>'+data.item+' / '+lang.text.clipart_item+'</small></span>';
 	}
 	
-	var html = '<p><a href="javascript:void(0);" onclick="getPrintingInfo();">'+lang.text.clipart_average+': '+price+'</a></p><p>';
+	var html = '<p><a href="javascript:void(0);" onclick="getPrintingInfo();"><i class="glyphicon glyphicon-info-sign"></i> '+lang.text.clipart_average+': '+price+'</a></p><p>';
 	
 	
 	if (typeof data.printing != 'undefined' && data.printing > 0)
 	{
-		html = html + '<span class="label label-default">'+lang.text.clipart_printing+': '+data.printing+'</span>';
+		html = html + '<span class="label label-primary">'+lang.text.clipart_printing+': '+data.printing+'</span>';
 	}
 	if (typeof data.clipart != 'undefined' && data.clipart > 0)
 	{
-		html = html + '<span class="label label-default">'+lang.text.clipart_title+': '+data.clipart+'</span>';
+		html = html + '<span class="label label-primary">'+lang.text.clipart_title+': '+data.clipart+'</span>';
 	}
 	html = html + '</p>'
 	div.html(html);

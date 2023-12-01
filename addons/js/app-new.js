@@ -2,7 +2,7 @@
 // change size of box design width product
 function change_box_design()
 {
-	jQuery('#app-wrap .labView').css({'width':max_box_width+'px', 'height':max_box_height+'px'}); 
+	jQuery('#app-wrap .labView').css({'width':max_box_width+'px', 'height':max_box_height+'px'});
 }
 
 jQuery(document).on('after.load.design', function(event, data){
@@ -22,7 +22,7 @@ jQuery(document).on('after.load.design', function(event, data){
 
 jQuery(document).ready(function(){
 	jQuery('#app-wrap .labView').append('<div class="mask-items-view"><div class="mask-items-area"><div class="mask-item"></div></div></div>');
-		
+
 	jQuery.each(['front', 'back', 'left', 'right'], function(i, view){
 		if (items.area[view] != '' && items.area[view] != '')
 		{
@@ -32,12 +32,12 @@ jQuery(document).ready(function(){
 			}
 			var params = eval ("(" + items.params[view] + ")");
 			var area = eval ("(" + items.area[view] + ")");
-			
+
 			sizesCn[view] =  params.width / area.width;
 		}
 	});
-	
-	jQuery(document).keydown(function( event ) {		
+
+	jQuery(document).keydown(function( event ) {
 		if (jQuery('.labView.active .drag-item-selected').length > 0)
 		{
 			var check = jQuery('#enter-text').is(":focus"); // disable move when focus text box.
@@ -70,19 +70,19 @@ jQuery(document).ready(function(){
 			}
 		}
 	});
-	
+
 	// product color on mobile
 	if ( jQuery('.product-color-active .product-color-active-value').length > 0)
 	{
 		var color_html = jQuery('#product-list-colors .bg-colors.active').html();
 		jQuery('.product-color-active .product-color-active-value').html(color_html);
-		
+
 		jQuery(document).on('changeColor.product.design product.change.design', function(){
 			var color_html = jQuery('#product-list-colors .bg-colors.active').html();
 			jQuery('.product-color-active .product-color-active-value').html(color_html);
 		});
 	}
-	
+
 	jQuery('#dg-fonts').on('show.bs.modal', function() {
 		var e    = design.item.get();
 		if(typeof e[0] == 'undefined')
@@ -115,8 +115,15 @@ jQuery(document).ready(function(){
 			}
 		});
 	});
-	
-	change_box_design()
+	change_box_design();
+	if(jQuery('#product-list-colors .bg-colors').length > 1)
+	{
+		jQuery('#product-list-colors').show();
+	}
+	else
+	{
+		jQuery('#product-list-colors').hide();
+	}
 });
 
 jQuery(document).on('before.product.change.design', function(event, product){
@@ -143,21 +150,23 @@ jQuery(document).on('before.product.change.design', function(event, product){
 			lang.text.right = product.view_label.right;
 		}
 	}
+	jQuery('.labView .content-inner').removeClass('is_change_color');
+	jQuery('.labView .content-inner').removeAttr('style');
 });
 
 jQuery(document).on("change.product.design", function(event, product){
 	if (typeof event.namespace == 'undefined' || event.namespace != 'design.product') return;
-	
+
 	jQuery.each(['front', 'back', 'left', 'right'], function(i, view){
 		if (items.area[view] != '' && items.area[view] != '')
 		{
 			var params = eval ("(" + items.params[view] + ")");
 			var area = eval ("(" + items.area[view] + ")");
-			
+
 			sizesCn[view] =  params.width / area.width;
 		}
 	});
-	
+
 	if(typeof product.box_width != 'undefined')
 	{
 		max_box_width = product.box_width;
@@ -184,6 +193,15 @@ jQuery(document).on("change.product.design", function(event, product){
 		var col_center_h = jQuery('.col-center').height();
 		jQuery('.col-left').css('top', col_center_h+'px');
 	}
+
+	if(jQuery('#product-list-colors .bg-colors').length > 1)
+	{
+		jQuery('#product-list-colors').show();
+	}
+	else
+	{
+		jQuery('#product-list-colors').hide();
+	}
 });
 
 jQuery(document).on('move.tool.design', function(event, elm){
@@ -192,10 +210,10 @@ jQuery(document).on('move.tool.design', function(event, elm){
 });
 
 jQuery(document).on('select.item.design', function(event, e){
-	
+
 	var id = jQuery('.labView.active').attr('id');
 	var view = id.replace('view-', '');
-	
+
 	if (jQuery(e).length == 0)
 	{
 		var elm = design.item.get();
@@ -205,34 +223,34 @@ jQuery(document).on('select.item.design', function(event, e){
 	var style = jQuery(e).parents('.design-area').attr('style');
 	jQuery(e).parents('.labView').find('.mask-items-area').attr('style', style);
 	jQuery(e).parents('.labView').find('.mask-items-view').css('display', 'block');
-	
+
 	var style = jQuery(e).attr('style');
 	var item = jQuery(e).parents('.labView').find('.mask-item');
 	item.attr('style', style);
-	var width = item.width();
-	width = parseInt(width) + 4;
+	var width = design.convert.px(jQuery(e).css('width'));
+	width = parseInt(width) + 2;
 	item.css('width', width+'px');
-	
+
 	// update size of item
 	if (jQuery('.labView.active .mask-item .item-info').length == 0)
 	{
 		item.append('<span class="item-info"></span>');
 	}
-	
+
 	if (jQuery('.labView.active .mask-item .item-mask-move').length == 0)
 	{
 		item.append('<div class="item-mask-move fa fa fa-arrows"></div>');
 	}
-	var width   = jQuery(e).css('width').replace('px', '');
-	var height  = jQuery(e).css('height').replace('px', '');
+	var width   = design.convert.px(jQuery(e).css('width'));
+	var height  = design.convert.px(jQuery(e).css('height'));
 	var type = jQuery(e).data('type');
 	jQuery(document).triggerHandler( "info.size.design", [type, width, height]);
 
 	var css_h = parseInt(height) + 2;
 	item.css('height', css_h+'px');
-	
+
 	// resize
-	var type = e.item.type;	
+	var type = e.item.type;
 	if(e.item.lockedProportion == 1)
 	{
 		var auto = false;
@@ -250,9 +268,9 @@ jQuery(document).on('select.item.design', function(event, e){
 		jQuery('.labView.active .mask-item').resizable( "destroy" );
 	var tempW = 0;
 	item.resizable({
-		minHeight: 5, 
+		minHeight: 5,
 		aspectRatio: auto,
-		minWidth: 5,		
+		minWidth: 5,
 		handles: 'ne, se, sw, nw',
 		alsoResize: ".drag-item.drag-item-selected",
 		start: function( event, ui ){
@@ -260,17 +278,19 @@ jQuery(document).on('select.item.design', function(event, e){
 			jQuery(document).triggerHandler( "resizeStart.item.design", [ui, e]);
 		},
 		stop: function( event, ui ) {
-			var item_size = e.getBoundingClientRect();
+			var item_size = {};
+			item_size.width = design.convert.px(jQuery(e).css('width'));
+			item_size.height = design.convert.px(jQuery(e).css('height'));
 			if(item_size.width > ui.size.width)
 			{
-				ui.size.width = item_size.width;
-				ui.size.height = item_size.height;
+				ui.size.width = item_size.width + 1;
+				ui.size.height = item_size.height + 1;
 				item.css({'width':ui.size.width+'px', 'height':ui.size.height+'px'});
 			}
 			jQuery(document).triggerHandler( "resize.item.design", [ui, e]);
-			design.print.size();
 			jQuery(document).triggerHandler( "update.design" );
 			setTimeout(function(){
+				design.print.size();
 				design.ajax.getPrice();
 			}, 500);
 		},
@@ -286,7 +306,7 @@ jQuery(document).on('select.item.design', function(event, e){
 
 			jQuery(e).css('left', ui.position.left+'px');
 			jQuery(e).css('top', ui.position.top+'px');
-			
+
 			if(jQuery(e).data('type') == 'clipart')
 			{
 				var file = jQuery(e).data('file');
@@ -311,7 +331,7 @@ jQuery(document).on('select.item.design', function(event, e){
 					var img = jQuery(e).find('image');
 					img[0].setAttributeNS(null, 'width', $width);
 					img[0].setAttributeNS(null, 'height', $height);
-					
+
 					if (flipFlg == false)
 					{
 						jQuery(img[0]).parent().attr('transform', 'translate('+$width+', 0) scale(-1,1)');
@@ -323,7 +343,7 @@ jQuery(document).on('select.item.design', function(event, e){
 			jQuery(document).triggerHandler( "resizzing.item.design", [ui, e]);
 		}
 	});
-	
+
 	var top = 0, left = 0; recoupLeft = 0, recoupTop = 0;
 	var move_axis = false;
 	var disable_move = false;
@@ -380,7 +400,7 @@ jQuery(document).on('select.item.design', function(event, e){
 			var areaW = jQuery(this).parent().width();
 			var areaH = jQuery(this).parent().height();
 			if (
-				(ui.position.left + width) < 5 
+				(ui.position.left + width) < 5
 				|| (ui.position.top + height) < 5
 				|| (ui.position.left + 5) > areaW
 				|| (ui.position.top + 5) > areaH
@@ -416,7 +436,7 @@ jQuery(document).on('select.item.design', function(event, e){
 	{
 		item.resizable( "enable" );
 	}
-	
+
 	// add remove button
 	if(typeof e.item.remove != 'undefined' && e.item.remove === false)
 	{
@@ -425,7 +445,7 @@ jQuery(document).on('select.item.design', function(event, e){
 	else
 	{
 		jQuery('.mask-item .item-mask-remove-on').css('visibility', 'visible');
-		
+
 		if (jQuery('.labView.active .mask-item .item-mask-remove-on').length == 0)
 		{
 			var div = document.createElement('div');
@@ -434,11 +454,11 @@ jQuery(document).on('select.item.design', function(event, e){
 			jQuery(div).click(function(){
 				design.item.mask.remove();
 			});
-			jQuery(item).append(div);		
-		}		
+			jQuery(item).append(div);
+		}
 	}
-	
-	// rotate	
+
+	// rotate
 	if(typeof e.item.allow_rotate != 'undefined' && e.item.allow_rotate === false)
 	{
 		jQuery('.mask-item .item-rotate-on').css('visibility', 'hidden');
@@ -446,7 +466,7 @@ jQuery(document).on('select.item.design', function(event, e){
 	else
 	{
 		jQuery('.mask-item .item-rotate-on').css('visibility', 'visible');
-		
+
 		var deg = jQuery(e).data('rotate');
 		jQuery('#' + type + '-rotate-value').val(deg);
 		if (typeof deg == 'undefined')
@@ -466,15 +486,16 @@ jQuery(document).on('select.item.design', function(event, e){
 		}
 		item.data('angle', deg);
 		item.rotatable({
-			angle: deg, 
+			angle: deg,
 			rotate: function(event, angle){
 				var deg = Math.round(angle.r);
 				if(deg < 0) deg = 360 + deg;
 				jQuery('#' + type + '-rotate-value').val(deg);
 				jQuery(e).data('rotate', deg);
-				
+
 				var radian = deg * Math.PI / 180;
 				//jQuery(e).rotatable("setValue", radian);
+				jQuery(document).triggerHandler( "rotate.item.design", radian);
 				design.item.mask.rotate(jQuery(e), radian);
 			}
 		});
@@ -488,7 +509,7 @@ jQuery(document).on('select.item.design', function(event, e){
 		itemHeightVal[0].removeAttribute('readonly');
 		itemHeightVal[0].removeAttribute('disabled');
 	}
-	
+
 	itemWidthVal.change(function(e) {
 		var txtH = (parseInt(design.item.get().css('height').replace('px', '')) * sizesCn[view]).toFixed(1);
 		var txtW = (parseInt(design.item.get().css('width').replace('px', '')) * sizesCn[view]).toFixed(1);
@@ -599,7 +620,7 @@ jQuery('.rotate-value').on("focus change", function(){
 	if(deg < 0) deg = 0;
 	var angle = (jQuery(this).val() * Math.PI)/180;
 	e.rotatable("setValue", angle);
-	
+
 	design.item.mask.rotate(jQuery('.labView.active .mask-item'), angle);
 });
 
@@ -625,7 +646,7 @@ design.item.mask = {
 		var elm = e.children('.item-remove-on');
 		if (elm.length > 0)
 		{
-			design.item.remove(elm[0]);			
+			design.item.remove(elm[0]);
 		}
 	},
 	rotate: function(el, angle){
@@ -638,14 +659,14 @@ design.item.mask = {
 
 jQuery(document).on('ini.design change.product.design', function(event){
 	if (typeof event.namespace == 'undefined') return;
-	
+
 	jQuery("#tool_cart select, input[type='radio'], input[type='checkbox']").change(function(){
-		design.ajax.getPrice();		
+		design.ajax.getPrice();
 	});
 
 	jQuery( "#quantity" ).spinner({
 		min: 0,
-      	max: 1000,
+      	max: 1000000000,
       	stop: function(event, ui){
 			design.ajax.getPrice();
 		}
@@ -696,7 +717,7 @@ jQuery(document).on('info.size.design', function(event, type, width, height){
 });
 
 jQuery(document).on('ini.design', function(event){
-	jQuery('.ui-lock').click(function(){		
+	jQuery('.ui-lock').click(function(){
 		var e = design.item.get();
 		if (jQuery(this).is(':checked') == true)
 		{
@@ -784,6 +805,23 @@ var changeSizeTextItem = function(e, newW, newH) {
 	{
 		item.find('image')[0].setAttribute('width', newW);
 		item.find('image')[0].setAttribute('height', newH);
+
+		var el = design.item.get();
+		if (typeof el != 'undefined') {
+			var svg = el.find('svg');
+			if(typeof svg[0] != 'undefined') {
+				var transform = '', g = jQuery(svg[0]).find('g');
+				if (g.length > 0) {
+					var is_flipX = g[0].getAttributeNS(null, 'transform');
+					if (is_flipX != null && is_flipX != '') {
+						transform = 'translate('+newW+', 0) scale(-1,1)';
+					}
+					if (transform != '') {
+						g[0].setAttributeNS(null, 'transform', transform);
+					}
+				}
+			}
+		}
 	}
 	jQuery(document).triggerHandler( "afterchangesize.item.design", [newW, newH]);
 	e.preventDefault();
@@ -811,6 +849,17 @@ jQuery(document).ready(function () {
 	jQuery('#dg-cliparts').bind('cut copy paste', function (e) {
         e.preventDefault();
     });
+    if(jQuery('#dg-design-ideas').length == 0)
+	{
+		jQuery('#art-keyword').keyup(function(e) {
+			var code = e.keyCode || e.which;
+			if (code == 13) {
+				design.designer.art.arts(0);
+				e.preventDefault();
+				return false;
+			}
+		});
+	}
 });
 jQuery(document).on('load.item.design', function(event, img, e){
 	if(typeof e.is_product != 'undefined' && e.is_product == 1)

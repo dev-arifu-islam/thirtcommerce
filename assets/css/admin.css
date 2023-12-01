@@ -11,7 +11,11 @@ div#product-price{border:0 none}
 #dg-share .modal-body{display:none}
 #store_product_categories{height:auto;font-size:12px;text-align:left;max-height:150px;overflow:auto}
 .arrow-mobile > button{display:none;}
-.idea-fields{position:absolute;top:0;right:0;z-index:100;background:#fff;display:none;float:left;max-width:210px;border:1px solid #f1f1f1;padding:6px 10px;background-color:#f5f5f5;margin-left:-8px;max-height:440px;overflow:auto}
+.idea-fields{
+    position:absolute;top:0;right:0;z-index:100;display:none;float:left;max-width:210px;border:1px solid #f1f1f1;padding:6px 10px;background-color:#fcfcfc;margin-left:-8px;max-height:440px;overflow:auto;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.05)
+}
 .control-layer-field {
     float: left;
     clear: both;
@@ -27,11 +31,10 @@ html, body, #admin-template{height: 100%;}
     bottom: auto!important;
 }
 #right-options div#product-details{
-	height: auto!important;
+    height: auto!important;
 }
 div.product-prices {
     position: relative;
-    margin-top: 30px;
 }
 .design-area {
     border-color: #000!important;
@@ -99,6 +102,17 @@ div.layer-options {
     left: 100px;
     display: none;
 }
+.layers-control > div.control-layer-lock {
+    border-bottom: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: auto;
+}
+.layers-control > div.control-layer-lock button {
+    border: none;
+}
 .layers-control > div.layers-tabs {
     float: left;
     width: auto;
@@ -125,7 +139,7 @@ div.layer-options {
     border-radius: 0 0 3px 3px;
 }
 .layers-control > div.layers-tabs a.layers-tab-item:first-child{
-	border-radius: 3px 3px 0 0;
+    border-radius: 3px 3px 0 0;
 }
 .layers-control > div.layers-tabs a.layers-tab-item:hover {
     background-color: #000;
@@ -171,3 +185,12 @@ div#dg-obj-ideas {
     font-size: 12px;
     cursor: pointer;
 }
+.idea-fields .control-layer-field button, .control-layer-field:last-child {
+    border: none;
+}
+.idea-fields .control-layer-field button {
+    outline: none;
+    background-color: transparent;
+}
+#dg-sidebar { right: 25px!important; }
+.dag-store-ideas .box-art.box-idea { height: 220px!important; }

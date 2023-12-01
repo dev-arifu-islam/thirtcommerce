@@ -115,8 +115,15 @@ jQuery(document).ready(function(){
 			}
 		});
 	});
-	
-	change_box_design()
+	change_box_design();
+	if(jQuery('#product-list-colors .bg-colors').length > 1)
+	{
+		jQuery('#product-list-colors').show();
+	}
+	else
+	{
+		jQuery('#product-list-colors').hide();
+	}
 });
 
 jQuery(document).on('before.product.change.design', function(event, product){
@@ -143,6 +150,8 @@ jQuery(document).on('before.product.change.design', function(event, product){
 			lang.text.right = product.view_label.right;
 		}
 	}
+	jQuery('.labView .content-inner').removeClass('is_change_color');
+	jQuery('.labView .content-inner').removeAttr('style');
 });
 
 jQuery(document).on("change.product.design", function(event, product){
@@ -184,6 +193,15 @@ jQuery(document).on("change.product.design", function(event, product){
 		var col_center_h = jQuery('.col-center').height();
 		jQuery('.col-left').css('top', col_center_h+'px');
 	}
+
+	if(jQuery('#product-list-colors .bg-colors').length > 1)
+	{
+		jQuery('#product-list-colors').show();
+	}
+	else
+	{
+		jQuery('#product-list-colors').hide();
+	}
 });
 
 jQuery(document).on('move.tool.design', function(event, elm){
@@ -209,8 +227,8 @@ jQuery(document).on('select.item.design', function(event, e){
 	var style = jQuery(e).attr('style');
 	var item = jQuery(e).parents('.labView').find('.mask-item');
 	item.attr('style', style);
-	var width = item.width();
-	width = parseInt(width) + 4;
+	var width = design.convert.px(jQuery(e).css('width'));
+	width = parseInt(width) + 2;
 	item.css('width', width+'px');
 	
 	// update size of item
@@ -223,8 +241,8 @@ jQuery(document).on('select.item.design', function(event, e){
 	{
 		item.append('<div class="item-mask-move fa fa fa-arrows"></div>');
 	}
-	var width   = jQuery(e).css('width').replace('px', '');
-	var height  = jQuery(e).css('height').replace('px', '');
+	var width   = design.convert.px(jQuery(e).css('width'));
+	var height  = design.convert.px(jQuery(e).css('height'));
 	var type = jQuery(e).data('type');
 	jQuery(document).triggerHandler( "info.size.design", [type, width, height]);
 
@@ -260,17 +278,19 @@ jQuery(document).on('select.item.design', function(event, e){
 			jQuery(document).triggerHandler( "resizeStart.item.design", [ui, e]);
 		},
 		stop: function( event, ui ) {
-			var item_size = e.getBoundingClientRect();
+			var item_size = {};
+			item_size.width = design.convert.px(jQuery(e).css('width'));
+			item_size.height = design.convert.px(jQuery(e).css('height'));
 			if(item_size.width > ui.size.width)
 			{
-				ui.size.width = item_size.width;
-				ui.size.height = item_size.height;
+				ui.size.width = item_size.width + 1;
+				ui.size.height = item_size.height + 1;
 				item.css({'width':ui.size.width+'px', 'height':ui.size.height+'px'});
 			}
 			jQuery(document).triggerHandler( "resize.item.design", [ui, e]);
-			design.print.size();
 			jQuery(document).triggerHandler( "update.design" );
 			setTimeout(function(){
+				design.print.size();
 				design.ajax.getPrice();
 			}, 500);
 		},
@@ -431,7 +451,9 @@ jQuery(document).on('select.item.design', function(event, e){
 			var div = document.createElement('div');
 			div.className = 'item-mask-remove-on fa fa-trash-o ui-resizable-handle';
 			div.setAttribute('title', lang.text.remove);
-			jQuery(div).bind('click', function(){design.item.mask.remove();});
+			jQuery(div).click(function(){
+				design.item.mask.remove();
+			});
 			jQuery(item).append(div);		
 		}		
 	}
@@ -473,6 +495,7 @@ jQuery(document).on('select.item.design', function(event, e){
 				
 				var radian = deg * Math.PI / 180;
 				//jQuery(e).rotatable("setValue", radian);
+				jQuery(document).triggerHandler( "rotate.item.design", radian);
 				design.item.mask.rotate(jQuery(e), radian);
 			}
 		});

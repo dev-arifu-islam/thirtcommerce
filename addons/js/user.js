@@ -23,6 +23,17 @@ design.user = {
 		if (type == 'login')
 		{
 			var url = mainURL + "wp-admin/admin-ajax.php?action=tshirt_login";
+
+			if (typeof design.platform !== 'undefined') {
+				// override prestashop
+				if (design.platform == 'prestashop') {
+					url = mainURL + '/modules/tshirtecommerce/ajax.php?method=login';
+				} 
+				// override opencart
+				else if (design.platform == 'opencart') {
+					url = mainURL + 'index.php?route=tshirtecommerce/designer_api/login'; // need get link again with opencart common // todo
+				}
+			}
 		}
 		else if(type == 'register')
 		{
@@ -49,33 +60,100 @@ design.user = {
 			url: url,
 			data: datas
 		}).done(function( data ) {
-			
-			if (typeof data.user != 'undefined')
-			{
-				user_id = data.user.key;
-				jQuery('#f-'+type).modal('hide');
-				var page = document.referrer;
-				jQuery.ajax({url: page}).done(function(){
-					if (is_save == 1)
-						design.save();
-					else
-						design.ajax.mydesign();
-				});
-			}
-			else
-			{
-				if (typeof data.error != 'undefined')
+			if (design.platform == 'wordpress') {
+				if (typeof data.user != 'undefined')
 				{
-					jQuery('#'+type+'-status').html(data.error);
-					jQuery('#'+type+'-status').css('display', 'block');
-					jQuery('#'+type+'-status a').click(function(e){
-						e.preventDefault(); 
-						var url = jQuery(this).attr('href'); 
-						window.open(url, '_blank');
+					user_id = data.user.key;
+					jQuery('#f-'+type).modal('hide');
+					var page = document.referrer;
+					jQuery.ajax({url: page}).done(function(){
+						if (is_save == 1)
+							design.save();
+						else
+							design.ajax.mydesign();
 					});
 				}
+				else
+				{
+					if (typeof data.error != 'undefined')
+					{
+						jQuery('#'+type+'-status').html(data.error);
+						jQuery('#'+type+'-status').css('display', 'block');
+						jQuery('#'+type+'-status a').click(function(e){
+							e.preventDefault(); 
+							var url = jQuery(this).attr('href'); 
+							window.open(url, '_blank');
+						});
+					}
+						
+				}
+				$btn.button('reset');
+			} 
+			// override presta
+			else if (design.platform == 'prestashop') {
+				if (typeof data.error != 'undefined' && typeof data.id_cus != 'undefined') {
+					var valid_login = data.error;
+					if (valid_login == 1) {
+						jQuery('#'+type+'-status').html(data.message);
+						jQuery('#'+type+'-status').css('display', 'block');
+						jQuery('#'+type+'-status a').click(function(e) {
+							e.preventDefault(); 
+							var url = jQuery(this).attr('href'); 
+							window.open(url, '_blank');
+						});
+					} else {
+						user_id = data.id_cus;
+						jQuery('#f-'+type).modal('hide');
+						var page = document.referrer;
+						jQuery.ajax({url: page}).done(function(){
+							if (is_save == 1) {
+								design.save();
+							} else {
+								design.ajax.mydesign();
+							}
+						});
+					}
+				}
+			} 
+			// override opencart
+			else {
+				if (typeof data.error != 'undefined' && typeof data.id != 'undefined')
+				{	
+					var valid_login = data.error;
 					
+					if (valid_login == 0)
+					{
+						if (typeof lang.login_failed !== 'undefined' && lang.login_failed != '') {
+							jQuery('#'+type+'-status').text(lang.login_failed);
+						}
+						jQuery('#'+type+'-status').css('display', 'block');
+						jQuery('#'+type+'-status a').click(function(e){
+							e.preventDefault(); 
+							var url = jQuery(this).attr('href'); 
+							window.open(url, '_blank');
+						});
+					}
+					else //if (valid_login >= 1)
+					{
+						user_id = data.id;
+						if (typeof window.parent.design_user_id	!== 'undefined') {
+							window.parent.design_user_id = data.id;
+						}
+						if (typeof window.parent.design_email !== 'undefined') {
+							window.parent.design_email = data.email;
+						}
+						jQuery('#f-'+type).modal('hide');
+						var page = document.referrer;
+						jQuery.ajax({url: page}).done(function(){
+							if (is_save == 1)
+								design.save();
+							else
+								design.ajax.mydesign();
+						});
+					}
+				}
 			}
+
 			$btn.button('reset');
 		});
 	}

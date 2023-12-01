@@ -12,18 +12,18 @@ var design={
 	fonts: '',
 	ini:function(){
 		var self = this;
-		
+
 		jQuery( ".accordion" ).accordion({heightStyle: "content", collapsible: true});
 		jQuery('.dg-tooltip').tooltip();
 		jQuery( "#layers" ).sortable({
 			cancel: ".remove-layer, .layer-options, .setting-layer, textarea.input-line",
 			stop: function( event, ui ) {
 			self.layers.sort();
-		}});		
+		}});
 		jQuery('.popover-close').click(function(){
 			jQuery( ".popover" ).hide('show');
-		});		
-		
+		});
+
 		design.item.move();
 		$jd( "#dg-outline-width" ).slider({
 			animate: true,
@@ -32,34 +32,39 @@ var design={
 				design.text.update('outline-width', ui.value);
 			}
 		});
-		
+
 		$jd( "#dg-shape-width" ).slider();
-		
+
 		$jd('.dg-color-picker-active').click(function(){
 			$jd(this).parent().find('ul').show('slow');
 		});
-		
+
 		/* rotate */
 		$jd('.rotate-refresh').click(function(){
 			self.item.refresh('rotate');
 		});
-		$jd('.rotate-value').on("focus change", function(){
+		$jd('.rotate-value').on("change", function(){
 			var e = self.item.get();
+			var elem = e[0];
 			var deg = $jd(this).val();
 			if(deg > 360) deg = 360;
 			if(deg < 0) deg = 0;
 			var angle = ($jd(this).val() * Math.PI)/180;
-			e.rotatable("setValue", angle);	
+			e.rotatable("setValue", angle);
+			design.item.unselect();
+			elem.click();
+			jQuery('#options-add_item_'+elem.item.type+ ' .dg-options-content').addClass('active');
+			jQuery('#options-add_item_'+elem.item.type+ ' .dg-options-content .toolbar-action-rotate').addClass('active');
 		});
-		
+
 		/* lock */
 		$jd('.ui-lock').click(function(){
 			var e = self.item.get();
-			e.resizable('destroy')			
+			e.resizable('destroy')
 			if($jd(this).is(':checked') == true) self.item.resize(e, 'n, e, s, w, se');
 			else self.item.resize(e, 'se');
 		});
-		
+
 		if (jQuery('.labView.active .product-design').html() == '')
 		{
 			setTimeout(function(){
@@ -67,9 +72,9 @@ var design={
 				if (typeof a_thumbs[0] != 'undefined')
 					a_thumbs[0].click();
 			}, 1000);
-			
+
 		}
-		
+
 		/* menu */
 		$jd('.menu-left a').click(function(){
 			$jd('.menu-left a').removeClass('active');
@@ -78,7 +83,7 @@ var design={
 			if($jd(this).hasClass('add_item_qrcode')) self.qrcode.open();
 			$jd(this).addClass('active');
 		});
-		
+
 		/* share */
 		jQuery('.list-share span').click(function(){
 			design.share.ini(jQuery(this).data('type'));
@@ -99,17 +104,20 @@ var design={
 				case 'zoom':
 					design.tools.zoom(this);
 					break;
+				case 'zoom_old':
+					design.tools.zoom_old();
+					break;
 				case 'reset':
 					design.tools.reset(this);
 					break;
 			}
 		});
-			
+
 		jQuery('#product-attributes .size-number').click(function(){
 			design.team.changeSize();
 		});
 		design.products.sizes();
-		
+
 		$jd('.add_item_clipart').click(function(){
 			if(jQuery('#dg-design-ideas').length == 0)
 			{
@@ -119,18 +127,18 @@ var design={
 				}
 			}
 		});
-		
+
 		$jd('.add_item_mydesign').click(function(){
 			self.ajax.mydesign();
 		});
-		
+
 		$jd('#dag-art-detail button').click(function(){
 			jQuery('#dag-art-detail').hide('slow');
 			jQuery('#dag-list-arts').show('slow');
 			jQuery('#arts-add').hide();
 			jQuery('#arts-pagination').css('display', 'block');
 		});
-		
+
 		/* layers-toolbar control */
 		jQuery('.layers-toolbar button').click(function(){
 			var arrow = jQuery('.col-right .arrow-mobile');
@@ -138,7 +146,7 @@ var design={
 			{
 				arrow.trigger( "click" );
 			}
-				
+
 			var elm = jQuery(this).parents('.div-layers').find('.control-layers');
 			if (elm.hasClass('active') == true)
 			{
@@ -151,7 +159,7 @@ var design={
 				jQuery(elm).show('show');
 			}
 		});
-		
+
 		jQuery( window ).resize(function() {
 			var width = jQuery(window).width();
 			if (width > 770)
@@ -165,35 +173,35 @@ var design={
 					jQuery('.col-right').attr('style', 'bottom: 60px; top: auto;');
 			}
 		});
-		
+
 		/* mobile toolbar */
 		jQuery('.dg-options-toolbar button').click(function(){
 			var check = jQuery(this).hasClass('active');
 			jQuery('.dg-options-toolbar button').removeClass('active');
 			var elm = jQuery(this).parents('.dg-options');
 			var type = jQuery(this).data('type');
-			
+
 			if (check == true)
 			{
 				elm.children('.dg-options-content').removeClass('active');
 				jQuery('.toolbar-action-'+type).removeClass('active');
 			}
 			else
-			{				
-				jQuery(this).addClass('active');				
+			{
+				jQuery(this).addClass('active');
 				elm.children('.dg-options-content').addClass('active');
 				elm.children('.dg-options-content').children('div').removeClass('active');
 				jQuery('.toolbar-action-'+type).addClass('active');
-			}			
+			}
 		});
-		
+
 		jQuery('#close-product-detail').click(function(){
 			jQuery('#dg-products .products-detail').hide();
 			jQuery('#dg-products .product-list').show();
 			jQuery('#loading-change-product').hide();
 			jQuery('#dg-products .product-detail.active').removeClass('active');
 		});
-		
+
 		/* text update */
 		$jd('.text-update').each(function(){
 			var e = $jd(this);
@@ -208,9 +216,9 @@ var design={
 			design.products.sizes();
 		});
 		jQuery('#quantity').keyup(function(e){
-			design.ajax.getPrice();			
-			e.preventDefault();	
-			return false;	
+			design.ajax.getPrice();
+			e.preventDefault();
+			return false;
 		});
 		jQuery('#team-edit-number').keyup(function(){
 			design.team.updateBack(this, 'number');
@@ -224,44 +232,44 @@ var design={
 			if (typeof o[0] != 'undefined')
 				design.item.select(o[0]);
 		});
-			
-		design.item.designini(items);		
+
+		design.item.designini(items);
 		design.designer.loadColors();
 		design.designer.loadFonts();
 		design.designer.fonts = {};
 		design.products.colorPicker();
 		design.designer.fontActive = {};
 		jQuery('.view_change_products').bind('click', function(){design.products.productCate(0)});
-		
+
 		jQuery('.modal .close').click(function(){
 			setTimeout(function(){
 				jQuery('#dg-modal .modal').hide();
 			}, 10);
 		});
-		
+
 		var quantity_ini = jQuery('#quantity').data('count');
 		if (quantity_ini < 0) quantity_ini = 0;
-		var input_size = jQuery('.list-number input.size-number');
+		var input_size = jQuery('#product-attributes .list-number input.size-number');
 		if (input_size.length > 0)
 		{
 			jQuery(input_size[0]).val(quantity_ini);
 			jQuery('#quantity').val(quantity_ini);
 		}
-		
+
 		jQuery(document).triggerHandler( "ini.design");
-		
+
 		design.ajax.getPrice();
 	},
 	ajax:{
 		form: function(){
 			var datas = {};
-			
+
 			datas.product_id = product_id;
-			
+
 			/* get product color */
 			var hex = design.exports.productColor();
 			var span_color = jQuery('#product-list-colors span.active');
-			var index = jQuery('#product-list-colors span').index(span_color);					
+			var index = jQuery('#product-list-colors span').index(span_color);
 			datas.colors = {};
 			datas.colors[index] = hex;
 
@@ -270,32 +278,32 @@ var design={
 				if(typeof datas.options == 'undefined')
 					datas.options = {};
 				datas.options.is_color_picker = 1;
-			}	
-			
+			}
+
 			/* get Design color and size*/
 			colors 			= {};
-			colors.front 		= design.print.colors('front');			
-			colors.back 		= design.print.colors('back');		
-			colors.left 		= design.print.colors('left');			
+			colors.front 		= design.print.colors('front');
+			colors.back 		= design.print.colors('back');
+			colors.left 		= design.print.colors('left');
 			colors.right 		= design.print.colors('right');
-			
-			datas.print 		= {};			
+
+			datas.print 		= {};
 			datas.print.sizes 	= JSON.stringify(design.print.size());
 			datas.print.colors 	= JSON.stringify(colors);
-		
+
 			/* product attribute */
 			var attributes = jQuery('#tool_cart').serializeObject();
-			datas = jQuery.extend(datas, attributes);			
-			
+			datas = jQuery.extend(datas, attributes);
+
 			datas.cliparts = design.exports.cliparts();
-			
+
 			jQuery(document).triggerHandler( "form.addtocart.design", datas);
-			
+
 			return datas;
 		},
 		getPrice: function(){
 			var datas = this.form();
-			
+
 			var lable = jQuery('#product-price .product-price-title');
 			var div = jQuery('#product-price .product-price-list');
 			var title = '';
@@ -311,13 +319,17 @@ var design={
 			}
 			design.ajax_price_str = str;
 
+			if (typeof datas.quantity != 'undefined' && datas.quantity < 1) {
+				datas.quantity = 1;
+			}
+
 			lable.html('Updating...');
 			jQuery.ajax({
 				type: "POST",
 				processData: false,
 				dataType: "json",
 				url: siteURL + "ajax.php?type=prices",
-				data: JSON.stringify(datas),				
+				data: JSON.stringify(datas),
 				contentType: "application/json; charset=utf-8",
 			}).done(function( data ) {
 				if (data != '')
@@ -325,10 +337,10 @@ var design={
 					if (typeof data.sale != 'undefined')
 					{
 						jQuery(document).triggerHandler( "price.addtocart.design", data);
-						
+
 						jQuery('.price-sale-number').html(data.sale);
 						jQuery('.price-old-number').html(data.old);
-						
+
 						if (data.sale == data.old)
 							jQuery('#product-price-old').css('display', 'none');
 						else
@@ -336,21 +348,21 @@ var design={
 					}
 				}
 			}).always(function(){
-				lable.html(title);				
+				lable.html(title);
 				design.print.colors();
 			});
 		},
 		isBlank: function(){
 			var check = {};
 			check.status = true;
-			
+
 			jQuery(document).triggerHandler( "checkItem.item.design", check );
-			
+
 			if (check.status == false && typeof check.callback != 'undefined')
 			{
 				return false;
 			}
-			
+
 			var items = jQuery('#app-wrap .drag-item');
 			if (items.length == 0)
 			{
@@ -417,7 +429,7 @@ var design={
 				{
 					delete design.output.left;
 					design.ajax.save();
-				}	
+				}
 			}
 			else if (design.ajax.active == 'right')
 			{
@@ -435,7 +447,7 @@ var design={
 		addToCart: function(){
 			var options		= {};
 			options.vectors	= JSON.stringify(design.exports.vector());
-			
+
 			options.images	= {};
 			options.isIE    = design.isIE();
 			if (jQuery('#view-front .product-design').html() != '')
@@ -449,7 +461,7 @@ var design={
 					options.images.front = design.output.front.toDataURL();
 				}
 			}
-			
+
 			if (jQuery('#view-back .product-design').html() != '')
 			{
 				if(design.isIE())
@@ -461,7 +473,7 @@ var design={
 					options.images.back  = design.output.back.toDataURL();
 				}
 			}
-			
+
 			if (jQuery('#view-left .product-design').html() != '')
 			{
 				if(design.isIE())
@@ -473,7 +485,7 @@ var design={
 					options.images.left  = design.output.left.toDataURL();
 				}
 			}
-			
+
 			if (jQuery('#view-right .product-design').html() != '')
 			{
 				if(design.isIE())
@@ -485,31 +497,31 @@ var design={
 					options.images.right = design.output.right.toDataURL();
 				}
 			}
-			
+
 			var datas = design.ajax.form();
-			datas.design = options;				
-			datas.teams = design.teams;				
+			datas.design = options;
+			datas.teams = design.teams;
 			datas.fonts = design.fonts;
-			
+
 			jQuery(document).triggerHandler( "before.addtocart.design", datas);
-			
+
 			jQuery.ajax({
 				type: "POST",
 				processData: false,
 				data: JSON.stringify(datas),
 				dataType: "json",
-				contentType: "application/json; charset=utf-8",	
-				url: siteURL + "ajax.php?type=addCart"					
+				contentType: "application/json; charset=utf-8",
+				url: siteURL + "ajax.php?type=addCart"
 			}).done(function( data ){
-				
+
 				jQuery(document).triggerHandler( "after.addtocart.design", data);
-				
+
 				var a = jQuery('#product-thumbs a');
 				if(typeof a[0] != 'undefined')
 				{
 					a[0].click();
 				}
-				
+
 				if (data != '')
 				{
 					var content = data;
@@ -526,25 +538,25 @@ var design={
 						alert_text(content.msg);
 					}
 				}
-			}).always(function(){				
+			}).always(function(){
 				design.mask(false);
-			});			
-		},		
-		mydesign: function(e){			
+			});
+		},
+		mydesign: function(e){
 			if (user_id == 0)
 			{
 				is_save = 0;
 				jQuery('#f-login').modal();
 			}
 			else
-			{				
+			{
 				jQuery('#dg-mydesign').modal();
 				var div = jQuery('#dg-mydesign .list-design-saved');
 				div.addClass('loading');
-				
+
 				var datas = {};
 				jQuery(document).triggerHandler( "before.save.design", datas);
-				
+
 				if (typeof e != 'undefined')
 				{
 					var page = jQuery(e).data('page');
@@ -554,7 +566,7 @@ var design={
 				{
 					var page = 0;
 				}
-				
+
 				datas.page = page;
 				jQuery.ajax({
 					type: "POST",
@@ -562,12 +574,12 @@ var design={
 					data: {url: urlDesign, datas: datas},
 					cache: false
 				}).done(function( data ){
-					
+
 					jQuery(document).triggerHandler( "after.save.design", data);
-					
+
 					div.removeClass('loading');
-					
-					
+
+
 					if (typeof $btn != 'undefined')
 					{
 						$btn.button('reset');
@@ -579,7 +591,7 @@ var design={
 					{
 						div.html(data);
 					}
-					
+
 					page = page + 1;
 					if (jQuery('#dg-mydesign img').length > (page*9)-1)
 					{
@@ -590,7 +602,7 @@ var design={
 					{
 						jQuery('#dg-mydesign .modal-footer').css('display', 'none');
 					}
-						
+
 					jQuery('#dg-mydesign .design-box a').each(function(){
 						if (typeof jQuery(this).data('added') == 'undefined')
 						{
@@ -611,7 +623,7 @@ var design={
 		removeDesign: function(e)
 		{
 			jQuery(document).triggerHandler( "before.remove.mydesign.design", e);
-			
+
 			jQuery(e).parents('.design-box').remove();
 			var id = jQuery(e).data('id');
 			jQuery.ajax({
@@ -625,9 +637,10 @@ var design={
 		elm: '',
 		data: '',
 		id: 0,
-		item: '',		
+		item: '',
 		preview: function(e)
 		{
+			var active_id = jQuery('#product-thumbs .active').attr('id');
 			if (jQuery('.labView.active .design-area').hasClass('zoom'))
 			{
 				this.zoom();
@@ -707,7 +720,7 @@ var design={
 						jQuery('#slide-front').append(design.output.front);
 					}
 				}
-				
+
 				if (jQuery('#view-back .product-design').html() != ''){
 					jQuery('#carousel-slide .carousel-inners').append('<div class="item"><div id="slide-back" class="slide-fill"></div></div>');
 					if(design.isIE())
@@ -719,7 +732,7 @@ var design={
 						jQuery('#slide-back').append(design.output.back);
 					}
 				}
-				
+
 				if (jQuery('#view-left .product-design').html() != ''){
 					jQuery('#carousel-slide .carousel-inners').append('<div class="item"><div id="slide-left" class="slide-fill"></div></div>');
 					if(design.isIE())
@@ -731,7 +744,7 @@ var design={
 						jQuery('#slide-left').append(design.output.left);
 					}
 				}
-				
+
 				if (jQuery('#view-right .product-design').html() != ''){
 					jQuery('#carousel-slide .carousel-inners').append('<div class="item"><div id="slide-right" class="slide-fill"></div></div>');
 					if(design.isIE())
@@ -746,15 +759,11 @@ var design={
 				jQuery('#dg-mask').css('display', 'none');
 				jQuery('#carousel-slide').append(html);
 				jQuery('#dg-preview').modal();
-				var a = jQuery('#product-thumbs a');
-				if(typeof a[0] != 'undefined')
-				{
-					a[0].click();
-				}
+				jQuery('#'+ active_id).trigger('click');
 			}, 1000);
 		},
 		undo: function(e)
-		{			
+		{
 		},
 		redo: function(e)
 		{
@@ -792,18 +801,40 @@ var design={
 			});
 			var svg = e.find('svg');
 			if(typeof svg[0] == 'undefined') return;
+
 			svg[0].setAttributeNS(null, 'width', new_w);
 			svg[0].setAttributeNS(null, 'height', new_h);
 			var img = e.find('image');
 			if(typeof img[0] != 'undefined')
 			{
+				// << fixed frames
+				if (jQuery(svg[0]).find('clipPath').length) {
+					var bboxs = jQuery(svg[0]).find('clipPath')[0].getBBox();
+					new_w = bboxs.width;
+					new_h = bboxs.height;
+					svg[0].setAttribute('viewBox', bboxs.x+' '+bboxs.y+' '+new_w+' '+new_h);
+				}
+				// >> fixed frames
+
 				img[0].setAttributeNS(null, 'width', new_w);
 				img[0].setAttributeNS(null, 'height', new_h);
+
+				var transform = '', g = jQuery(svg[0]).find('g');
+				if (g.length > 0) {
+					var is_flipX = g[0].getAttributeNS(null, 'transform');
+					if (is_flipX != null && is_flipX != '') {
+						transform = 'translate('+new_w+', 0) scale(-1,1)';
+					}
+					if (transform != '') {
+						g[0].setAttributeNS(null, 'transform', transform);
+					}
+				}
 			}
 			design.item.unselect();
 			design.item.select(e[0]);
 			var ui = {};
-			ui.size = {'width': new_w, 'height': new_h}
+			ui.size = {'width': new_w, 'height': new_h};
+
 			jQuery(document).triggerHandler( "resize.item.design", [ui, e[0]]);
 		},
 		zoom_old: function()
@@ -817,10 +848,10 @@ var design={
 			var area 	= eval ("(" + items['area'][postion] + ")");
 			if (view.hasClass('zoom'))
 			{
-				var colorIndex = jQuery('#product-list-colors span').index(jQuery('#product-list-colors span.active'));				
+				var colorIndex = jQuery('#product-list-colors span').index(jQuery('#product-list-colors span.active'));
 				view.removeClass('zoom');
 				view.css({"width": area.width, "height": area.height, "top":area.top, "left":area.left});
-				
+
 				var images 	= eval ("(" + items['design'][colorIndex][postion] + ")");
 				jQuery.each(images, function(i, image){
 					if (image.id != 'area-design')
@@ -828,7 +859,7 @@ var design={
 						jQuery('#'+postion+'-img-'+image.id).css({"width":image.width, "height":image.height, "left":image.left,"top":image.top});
 					}
 				});
-				
+
 				this.changeZoom(view, true);
 			}
 			else
@@ -861,11 +892,11 @@ var design={
 						imgH = design.convert.px(this.style.height)*zoomIn,
 						imgT = design.convert.px(this.style.top)*zoomIn,
 						imgL = design.convert.px(this.style.left)*zoomIn;
-						
+
 					jQuery(this).css({"width":imgW, "height":imgH, "top":imgT-zoomT, "left":imgL-zoomL});
 				});
 				view.css({"width": Math.round(newWidth), "height": Math.round(newHeight), "top":top, "left": left});
-				
+
 				view.data('width', area.width);
 				view.data('height', area.height);
 				view.data('zoom', zoomIn);
@@ -899,7 +930,7 @@ var design={
 						imgH = design.convert.px(this.style.height)*zoomIn,
 						imgT = design.convert.px(this.style.top)*zoomIn,
 						imgL = design.convert.px(this.style.left)*zoomIn;
-						
+
 					jQuery(this).css({"width":imgW+'px', "height":imgH+'px', "top":(imgT-0)+'px', "left":(imgL-0)+'px'});
 				});
 
@@ -908,7 +939,7 @@ var design={
 						imgH = design.convert.px(this.style.height)*zoomIn,
 						imgT = design.convert.px(this.style.top)*zoomIn,
 						imgL = design.convert.px(this.style.left)*zoomIn;
-						
+
 					jQuery(this).css({"width":imgW+'px', "height":imgH+'px', "top":(imgT-0)+'px', "left":(imgL-0)+'px'});
 				});
 				var new_w 		= width * zoomIn;
@@ -923,6 +954,8 @@ var design={
 				else area.removeClass('zoom');
 				design.tools.changeZoom(area, false);
 			});
+			if(jQuery('#dg-wapper').height() > 600)
+				window.parent.setHeigh(jQuery('#dg-wapper').height());
 		},
 		changeZoom: function(view, type){
 			design.item.unselect();
@@ -935,9 +968,9 @@ var design={
 					css.left 	= design.convert.px(this.style.left);
 					css.width 	= design.convert.px(this.style.width);
 					css.height 	= design.convert.px(this.style.height);
-				
+
 				var svg = jQuery(this).find('svg');
-				var img = jQuery(svg).find('image');				
+				var img = jQuery(svg).find('image');
 				var itemsCss	= {};
 				if (type == false)
 				{
@@ -965,7 +998,7 @@ var design={
 				}
 				jQuery(this).css({"width": itemsCss.width, "height": itemsCss.height, "top":itemsCss.top, "left": itemsCss.left});
 				svg[0].setAttributeNS(null, 'width', itemsCss.width);
-				svg[0].setAttributeNS(null, 'height', itemsCss.height);				
+				svg[0].setAttributeNS(null, 'height', itemsCss.height);
 				if (typeof img[0] != 'undefined')
 				{
 					img[0].setAttributeNS(null, 'width', imgW);
@@ -1027,7 +1060,7 @@ var design={
 				svg = e.find('svg'),
 				transform = '';
 				if(typeof svg[0] == 'undefined')
-					return false;	
+					return false;
 			var viewBox = svg[0].getAttributeNS(null, 'viewBox');
 			if (viewBox != null && viewBox != '' )
 			{
@@ -1040,9 +1073,9 @@ var design={
 				if (typeof width != 'undefined' && width != null)
 				{
 					width = width.replace('px', '');
-				}				
+				}
 			}
-			
+
 			if(typeof e.data('flipX') == 'undefined') e.data('flipX', true);
 			if(e.data('flipX') === true){
 				transform = 'translate('+width+', 0) scale(-1,1)';
@@ -1051,7 +1084,7 @@ var design={
 			else{
 				transform = 'translate(0, 0) scale(1,1)';
 				e.data('flipX', true);
-			}					
+			}
 			var g = jQuery(svg[0]).find('g');
 			if (g.length > 0)
 				g[0].setAttributeNS(null, 'transform', transform);
@@ -1082,43 +1115,43 @@ var design={
 		copy: function(){
 			var e = design.item.get();
 			if (e.length == 0) return;
-			
+
 			this.item = e[0].item;
 			this.id = e[0].id;
-			this.data = e.data;			
-			this.elm = jQuery('<div>').append(e.clone()).html();		
+			this.data = e.data;
+			this.elm = jQuery('<div>').append(e.clone()).html();
 		},
 		paste: function(){
 			if (this.elm == '') return;
-			
+
 			var n = -1;
 			jQuery('#app-wrap .drag-item').each(function(){
 				var index 	= jQuery(this).attr('id').replace('item-', '');
 				if (index > n) n = parseInt(index);
-			});			
+			});
 			var id = n + 1;
-			
+
 			var elm = this.elm;
 			elm = elm.replace('id="'+this.id+'"', 'id="item-'+id+'"');
-			
+
 			design.item.unselect();
-			
+
 			jQuery('.labView.active .content-inner').append(elm);
-			var e = jQuery('#item-'+id);	
-			e.data('id', id);			
+			var e = jQuery('#item-'+id);
+			e.data('id', id);
 			e[0].item = this.item;
 			e[0].item.id = item;
-			
+
 			var e = jQuery('#item-'+id);
 			design.item.move(e);
-			design.item.resize(e);				
+			design.item.resize(e);
 			design.item.rotate(e);
 			e.bind('click', function(e){design.item.select(this); e.stopPropagation();});
 			design.layers.add(e[0].item);
-			design.item.setup(e[0].item);			
-			design.print.colors();			
+			design.item.setup(e[0].item);
+			design.print.colors();
 			design.print.size();
-			design.ajax.getPrice();		
+			design.ajax.getPrice();
 		},
 		move: function(type){
 			var markArea = jQuery('.labView.active .mask-items-view .mask-items-area');
@@ -1129,7 +1162,7 @@ var design={
 			}
 			var e = design.item.get();
 			if (e.length == 0) return;
-			
+
 			if (type == 'left')
 			{
 				var left = e.css('left');
@@ -1183,7 +1216,7 @@ var design={
 				var left = (pw - $width)-2;
 				e.css('left', left+'px');
 			}
-			
+
 			jQuery(document).triggerHandler( "move.tool.design", e);
 			jQuery(document).triggerHandler( "design_undo_redo" );
 		}
@@ -1194,7 +1227,7 @@ var design={
 			{
 				return '';
 			}
-			
+
 			if (typeof view != 'undefined')
 				view = ' #view-'+view;
 			else
@@ -1202,17 +1235,18 @@ var design={
 			design.colors = [];
 			jQuery('#app-wrap'+view).find('svg').each(function(){
 				var o = document.getElementById(jQuery(this).parent().attr('id'));
-				if(typeof o.item.confirmColor != 'undefined' && o.item.confirmColor == true && typeof o.item.colors != 'undefined')
+				if(typeof o != 'undefined' && o != null && o.item != undefined && typeof o.item.confirmColor != 'undefined' && o.item.confirmColor == true && typeof o.item.colors != 'undefined')
 				{
 					var colors = o.item.colors;
 					jQuery.each(colors, function(i, hex){
 						hex = hex.toString();
 						hex = hex.replace('#', '');
+						hex = (hex+'').toLowerCase();
 						if (jQuery.inArray(hex, design.colors) == -1 && hex != 'none')
 						{
 							design.colors.push(hex);
 						}
-					});					
+					});
 				}
 				else
 				{
@@ -1224,6 +1258,7 @@ var design={
 					jQuery.each(colors, function(i, hex){
 						hex = hex.toString();
 						hex = hex.replace('#', '');
+						hex = (hex+'').toLowerCase();
 						if (jQuery.inArray(hex, design.colors) == -1 && hex != 'none')
 						{
 							design.colors.push(hex);
@@ -1236,13 +1271,13 @@ var design={
 			jQuery.each(design.colors, function(i, hex){
 				div.append('<span style="background-color:#'+hex+'" class="bg-colors"></span>');
 			});
-			return design.colors;			
+			return design.colors;
 		},
 		size:function(){
 			var sizes = {};
 			var postions = ['front', 'back', 'left', 'right'];
 			jQuery('.screen-size').html('<div id="sizes-used"></div>');
-			
+
 			jQuery.each(postions, function(i, postion){
 				if (jQuery('#view-'+postion+ ' .content-inner').html() != '' && jQuery('#view-'+postion+ ' .product-design').html() != '')
 				{
@@ -1252,18 +1287,18 @@ var design={
 					area.height = design.convert.px(div.css('height'));
 					if(div.hasClass('zoom'))
 					{
-						area.width = div.data('width');
-						area.height = div.data('height');
 						var zoom = div.data('zoom');
+						area.width = area.width / zoom;
+						area.height = area.height / zoom;
 					}
 					else
 					{
 						var zoom = 1;
 					}
-										
+
 					jQuery('#view-'+postion+ ' .drag-item').each(function(){
 						var o = {}, e = jQuery(this);
-						
+
 						o.left = design.convert.px(e.css('left'))/zoom;
 						o.top = design.convert.px(e.css('top'))/zoom;
 						o.width = design.convert.px(e.css('width'));
@@ -1271,12 +1306,12 @@ var design={
 						o.height = design.convert.px(e.css('height'));
 						o.height = o.height/zoom;
 						o.right = area.width - o.left - o.width;
-						o.bottom = area.height - o.top - o.height;						
+						o.bottom = area.height - o.top - o.height;
 						if (o.left < 0) o.left = 0;
 						if (o.top < 0) o.top = 0;
 						if (o.right < 0) o.right = 0;
-						if (o.bottom < 0) o.bottom = 0;						
-						
+						if (o.bottom < 0) o.bottom = 0;
+
 						if (o.top < top) top = o.top;
 						if (o.left < left) left = o.left;
 						if (o.right < right) right = o.right;
@@ -1284,7 +1319,7 @@ var design={
 					});
 					print.width 	= area.width - left - right;
 					print.height 	= area.height - top - bottom;
-					
+
 					if (print.width > 0 && print.height > 0)
 					{
 						if(print.width >= area.width) print.width = area.width;
@@ -1296,16 +1331,16 @@ var design={
 						sizes[postion].size = design.print.perpage(sizes[postion].width, sizes[postion].height);
 						jQuery('#sizes-used').append('<div class="text-center"><strong>'+lang.text[postion]+'</strong><br /><span class="paper glyphicons file"><strong>A'+sizes[postion].size+'</strong></span></div>');
 					}
-					
+
 				}
-			});			
+			});
 			return sizes;
 		},
 		perpage: function(width, height){
             var pagesW = [], pagesH = [];
-            pagesW[0] = 10.5, pagesW[1] = 14.8, pagesW[2] = 21, pagesW[3] = 29.7, pagesW[4] = 42, 
+            pagesW[0] = 10.5, pagesW[1] = 14.8, pagesW[2] = 21, pagesW[3] = 29.7, pagesW[4] = 42,
             pagesW[5] = 59.4, pagesW[6] = 84.1;
-            pagesH[0] = 14.8, pagesH[1] = 21, pagesH[2] = 29.7, pagesH[3] = 42, pagesH[4] = 59.4, 
+            pagesH[0] = 14.8, pagesH[1] = 21, pagesH[2] = 29.7, pagesH[3] = 42, pagesH[4] = 59.4,
             pagesH[5] = 84.1, pagesH[6] = 118.9;
 			width = width.toFixed(1);
 			height = height.toFixed(1);
@@ -1336,7 +1371,7 @@ var design={
 				if (jQuery('#dag-art-categories').length == 0) return false;
 				if (typeof index == 'undefined') index = 0;
 				self = this;
-				
+
 				var ajax = true;
 				if (typeof load != 'undefined' && load == true)
 				{
@@ -1351,23 +1386,23 @@ var design={
 				{
 					ajax = false;
 				}
-				
+
 				if (ajax == true)
-				{					
+				{
 					jQuery('#dag-art-categories').addClass('loading');
-					jQuery.ajax({				
+					jQuery.ajax({
 						dataType: "json",
 						url: siteURL + "ajax.php?type=cateArts"
 					}).done(function( data ) {
 						if (data != '')
-						{								
+						{
 							var e = document.getElementById('dag-art-categories');
-							self.treeCategories(data, e, index);		
+							self.treeCategories(data, e, index);
 							design.artCategories = data;
 						}
 					}).always(function(){
 						jQuery('#dag-art-categories').removeClass('loading');
-					});					
+					});
 				}
 			},
 			loadarts: function(cate_id, start, keyword){
@@ -1389,7 +1424,7 @@ var design={
 						}
 						var art = arts[start];
 						start = start + 1;
-						
+
 						if (cate_id > 0)
 						{
 							if (typeof art.cate_id == 'undefined') art.cate_id = 0;
@@ -1399,14 +1434,14 @@ var design={
 								continue;
 							}
 						}
-						
+
 						var title = art.title.toLowerCase();
 						if (title.indexOf(keyword) == -1)
 						{
 							i = i + 1;
 							continue;
 						}
-						
+
 						var url = art.url;
 						var div = document.createElement('div');
 							div.className = 'box-art';
@@ -1423,7 +1458,10 @@ var design={
 							art.imgThumb = url + art.thumb;
 							art.imgMedium = url + art.medium;
 							a.item = art;
-						var img = '<img alt="" src="'+url + art.thumb+'">';
+						if(art.thumb.indexOf('tshirtecommerce/uploaded') == -1)
+							var img = '<img alt="" src="'+url + art.thumb+'">';
+						else
+							var img = '<img alt="" src="'+art.thumb+'">';
 						a.innerHTML = img;
 						div.appendChild(a);
 						if(art.price != 0)
@@ -1444,7 +1482,7 @@ var design={
 							button.setAttribute('type', 'button');
 							button.innerHTML = lang.text.show_design;
 						ul.html(button);
-						
+
 						jQuery(button).click(function(){
 							jQuery('#dg-cliparts .modal-body').css('opacity', '0.5');
 							var limit = start + 18;
@@ -1456,12 +1494,12 @@ var design={
 									jQuery('#arts-pagination').css('display', 'none');
 									break;
 								}
-								
+
 								var art = arts[start];
 								start = start + 1;
-								
+
 								if (cate_id > 0)
-								{								
+								{
 									if (typeof art.cate_id == 'undefined') art.cate_id = 0;
 									if (cate_id != art.cate_id)
 									{
@@ -1469,33 +1507,33 @@ var design={
 										continue;
 									}
 								}
-								
+
 								var title = art.title.toLowerCase();
 								if (title.indexOf(keyword) == -1)
 								{
 									i = i + 1;
 									continue;
 								}
-								
+
 								var url = art.url;
 								var div = document.createElement('div');
 									div.className = 'box-art';
 								var a = document.createElement('a');
 									a.setAttribute('title', art.title);
-									
+
 									a.setAttribute('href', 'javascript:void(0)');
 									a.setAttribute('onclick', 'design.art.create(this)');
-									
+
 									jQuery(a).data('title', art.title);
 									jQuery(a).data('description', art.description);
 									jQuery(a).data('price', art.price);
 									jQuery(a).data('id', art.clipart_id);
 									jQuery(a).data('clipart_id', art.clipart_id);
 									jQuery(a).data('medium', url + art.medium);
-									
+
 									art.imgThumb = url + art.thumb;
 									art.imgMedium = url + art.medium;
-									
+
 									a.item = art;
 								var img = '<img alt="" src="'+url + art.thumb+'">';
 								a.innerHTML = img;
@@ -1518,13 +1556,13 @@ var design={
 				}
 			},
 			arts: function(cate_id, start)
-			{				
+			{
 				if (jQuery('#dag-list-arts').length == 0) return false;
-				if (typeof start == 'undefined') start = 0;								
-				if (typeof cate_id == 'undefined') cate_id = 0;								
-				
+				if (typeof start == 'undefined') start = 0;
+				if (typeof cate_id == 'undefined') cate_id = 0;
+
 				var self = this;
-				var parent = document.getElementById('dag-list-arts');				
+				var parent = document.getElementById('dag-list-arts');
 				parent.innerHTML = '';
 				jQuery('#dag-art-detail').hide('slow');
 				jQuery('#dag-list-arts').show('slow');
@@ -1535,7 +1573,7 @@ var design={
 					jQuery('#dag-art-categories li.show-subfolder').removeClass('active');
 					jQuery('#dag-art-categories a.active').removeClass('active');
 				}
-				
+
 				var keyword = jQuery('#art-keyword').val();
 				keyword = keyword.toLowerCase();
 				if(self.designs.length > 0)
@@ -1544,15 +1582,19 @@ var design={
 					return;
 				}
 				jQuery('#dag-list-arts').addClass('loading');
-				jQuery.ajax({		
-					dataType: "json",					
+				var data = {};
+				jQuery(document).triggerHandler( "beforeArts", data);
+				jQuery.ajax({
+					dataType: "json",
+					type: "POST",
+					data: data,
 					url: siteURL + "ajax.php?type=arts"
 				}).done(function( data ) {
 					if (data == null || data.count == 0)
 					{
 						jQuery('#dag-list-arts').removeClass('loading');
 						parent.innerHTML = lang.designer.datafound;
-						var ul = jQuery('#arts-pagination .pagination').html('');						
+						var ul = jQuery('#arts-pagination .pagination').html('');
 						return false;
 					}
 					self.designs = data.arts;
@@ -1573,22 +1615,22 @@ var design={
 					var html = 	'<div class="col-xs-5 col-md-5 art-detail-left">'
 							+ 		'<img class="thumbnail img-responsive" src="'+jQuery(e).data('medium')+'" alt="">'
 							+ 	'</div>'
-							+ 	'<div class="col-xs-7 col-md-7 art-detail-right">'							
+							+ 	'<div class="col-xs-7 col-md-7 art-detail-right">'
 							+ 	'</div>';
 					div.innerHTML = html;
-					jQuery('#dag-art-detail').append(div);					
+					jQuery('#dag-art-detail').append(div);
 					jQuery('.art-detail-price').html('');
-										
+
 					var info = jQuery('#art-detail-'+id+' .art-detail-right');
-					info.html('');					
+					info.html('');
 					info.append('<h4>'+jQuery(e).data('title')+'</h4>');
 					info.append('<p>'+jQuery(e).data('description')+'</p>');
-					e.item.title = jQuery(e).data('title');							
+					e.item.title = jQuery(e).data('title');
 				}
 				else
 				{
 					jQuery('#art-detail-'+id).css('display', 'block');
-				}				
+				}
 				if(typeof currency_postion != 'undefined' && currency_postion == 'right')
 				{
 					jQuery('.art-detail-price').html(lang.text.fromt+' '+ jQuery(e).data('price') + currency_symbol);
@@ -1597,7 +1639,7 @@ var design={
 					jQuery('.art-detail-price').html(lang.text.fromt+' '+ currency_symbol + jQuery(e).data('price'));
 				}
 				jQuery(document).triggerHandler( "price.clipart.design", [lang.text.fromt, currency_symbol, jQuery(e).data('price')]);
-				
+
 				jQuery('#dag-list-arts').hide('slow');
 				jQuery('#dag-art-detail').show('slow');
 				jQuery('#arts-add').show();
@@ -1613,7 +1655,7 @@ var design={
 				jQuery(ul).data('type', system);
 				jQuery.each(categories, function(i, cate){
 					var li = document.createElement('li'),
-						a = document.createElement('a');						
+						a = document.createElement('a');
 						if (jQuery.isEmptyObject(cate.children) == false)
 						{
 							var span = document.createElement('span');
@@ -1629,7 +1671,7 @@ var design={
 								});
 							});
 							li.appendChild(span);
-						}			
+						}
 						a.setAttribute('href', 'javascript:void(0)');
 						a.setAttribute('title', cate.title);
 						jQuery(a).data('id', cate.id);
@@ -1647,7 +1689,7 @@ var design={
 						});
 						a.innerHTML = cate.title;
 						li.appendChild(a);
-					ul.appendChild(li);					
+					ul.appendChild(li);
 					if (jQuery.isEmptyObject(cate.children) == false)
 						design.designer.art.treeCategories(cate.children, li);
 				});
@@ -1658,39 +1700,39 @@ var design={
 		fontActive: {},
 		loadColors: function(){
 			var self = this;
-			jQuery.ajax({				
+			jQuery.ajax({
 				dataType: "json",
 				url: siteURL + "ajax.php?type=colors"
 			}).done(function( data ) {
 				if (data.status == 1)
-				{					
-					self.addColor(data.colors);					
+				{
+					self.addColor(data.colors);
 				}
-			}).always(function(){			
+			}).always(function(){
 			});
 		},
 		addColor: function(colors)
 		{
 			var screen_colors	= jQuery('#screen_colors_list');
 			var div = jQuery('.other-colors');
-			jQuery(div).html('<span class="bg-colors bg-none" data-color="none" title="Normal" onclick="design.item.changeColor(this)"></span>');			
+			jQuery(div).html('<span class="bg-colors bg-none" data-color="none" title="Normal" onclick="design.item.changeColor(this)"></span>');
 			jQuery.each(colors, function(i, color){
 				var span = document.createElement('span');
 					span.className = 'bg-colors';
 					span.setAttribute('data-color', color.hex);
-					span.setAttribute('title', color.title);							
-					span.setAttribute('onclick', 'design.item.changeColor(this)');							
-					span.style.backgroundColor = '#'+color.hex;						
-				jQuery(div).append(span);				
-				
+					span.setAttribute('title', color.title);
+					span.setAttribute('onclick', 'design.item.changeColor(this)');
+					span.style.backgroundColor = '#'+color.hex;
+				jQuery(div).append(span);
+
 				screen_colors.append('<span class="bg-colors" onclick="design.print.addColor(this)" style="background-color:#'+color.hex+'" data-color="'+color.hex+'" title="'+color.title+'"></span>');
-			});	
+			});
 		},
 		loadFonts: function(){
 			var self = this;
 			var data = {};
 			jQuery(document).triggerHandler( "beforeloadfonts", data);
-			jQuery.ajax({				
+			jQuery.ajax({
 				dataType: "json",
 				type: "POST",
 				data: data,
@@ -1721,7 +1763,7 @@ var design={
 								j++;
 							}
 						}
-						
+
 					}
 					self.fonts = data.fonts;
 					self.addFonts(data.fonts);
@@ -1729,7 +1771,7 @@ var design={
 					jQuery(div).html('');
 					jQuery.each(data.fonts.fonts, function(i, font){
 						var a = document.createElement('a');
-							a.className = 'box-font';							
+							a.className = 'box-font';
 							a.setAttribute('href', 'javascript:void(0)');
 							jQuery(a).data('id', font.id);
 							jQuery(a).data('title', font.title);
@@ -1750,7 +1792,7 @@ var design={
 						jQuery(div).append(a);
 					});
 				}
-			}).always(function(){			
+			}).always(function(){
 			});
 		},
 		addFonts: function(data)
@@ -1758,27 +1800,27 @@ var design={
 			var self = this;
 			var ul = jQuery('.font-categories');
 			ul.html('');
-			var li = document.createElement('li');				
+			var li = document.createElement('li');
 			jQuery(li).bind('click', function(){self.cateFont(this)});
 			jQuery(li).data('id', 0);
 			var html = '<a href="javascript:void(0);" title="'+lang.text.all_fonts+'">'+lang.text.all_fonts+'</a>';
 			li.innerHTML = html;
 			jQuery(ul).append(li);
 			jQuery.each(data.categories, function(i, cate){
-				var li = document.createElement('li');				
+				var li = document.createElement('li');
 				jQuery(li).bind('click', function(event){ event.preventDefault(); self.cateFont(this)});
 				jQuery(li).data('id', cate.id);
 				var html = '<a href="javascript:void(0);" title="'+cate.title+'">'+cate.title+'</a>';
 				li.innerHTML = html;
 				jQuery(ul).append(li);
-			});			
+			});
 		},
 		cateFont: function(e)
 		{
 			var self = this;
 			var id = jQuery(e).data('id');
 			if (typeof id != 'undefined')
-			{				
+			{
 				var div = jQuery('.list-fonts');
 				jQuery(div).html('');
 				if (typeof this.fonts.cateFonts != 'undefined' && typeof this.fonts.cateFonts[id] != 'undefined')
@@ -1793,7 +1835,7 @@ var design={
 					if(font.published == 0)
 						return;
 					var a = document.createElement('a');
-						a.className = 'box-font';							
+						a.className = 'box-font';
 						a.setAttribute('href', 'javascript:void(0)');
 						jQuery(a).data('id', font.id);
 						jQuery(a).data('title', font.title);
@@ -1812,7 +1854,7 @@ var design={
 						jQuery(a).bind('click', function(){self.changeFont(this)});
 					a.innerHTML = html;
 					jQuery(div).append(a);
-				});				
+				});
 			}
 		},
 		changeFont: function(e)
@@ -1823,7 +1865,7 @@ var design={
 				jQuery('#dg-fonts').modal('hide');
 				return false;
 			}
-			
+
 			jQuery('.list-fonts a').removeClass('active');
 			jQuery(e).addClass('active');
 			var id = jQuery(e).data('id');
@@ -1831,89 +1873,92 @@ var design={
 			if (typeof id != 'undefined')
 			{
 				var title = jQuery(e).data('title');
-				jQuery('#txt-fontfamily').html(title);				
+				jQuery('#txt-fontfamily').html(title);
 				if (typeof design.designer.fontActive[id] == 'undefined' && jQuery(e).data('type') == 'google')
-				{					
+				{
 					design.text.update('fontfamily', title);
 					jQuery('.labView.active .content-inner').removeClass('loading');
 					setTimeout(function(){
 						var e = design.item.get();
-						
+
 						var rotate = e.data('rotate');
 						if (rotate == 'undefined') rotate = 0;
 						rotate = rotate * Math.PI / 180;
 						e.css('transform', 'rotate(0rad)');
-										
+
 						var txt = e.find('text');
-						txt[0].setAttributeNS(null, 'y', 0);
-						var size1 = txt[0].getBoundingClientRect();
-						var size2 = e[0].getBoundingClientRect();
-						
-						var $w 	= parseInt(size1.width);							
-						var $h 	= parseInt(size1.height);							
-						
-						design.item.updateSize($w, $h);	
-						
-						var svg = e.find('svg'),
-						view = svg[0].getAttributeNS(null, 'viewBox');
-						var arr = view.split(' ');						
-						//var y = txt[0].getAttributeNS(null, 'y');						
-						//y = Math.round(y) + Math.round(size2.top) - Math.round(size1.top) - ( (Math.round(size2.top) - Math.round(size1.top)) * (($w - arr[2])/$w) );						
-						//if (y < 0) y = '';
-						var y = (size2.top - size1.top) * arr[3] / $h;
-						txt[0].setAttributeNS(null, 'y', y);
-						
+						if (txt.length) {
+							txt[0].setAttributeNS(null, 'y', 0);
+							var size1 = txt[0].getBoundingClientRect();
+
+							var size2 = e[0].getBoundingClientRect();
+
+							var $w 	= parseInt(size1.width);
+							var $h 	= parseInt(size1.height);
+
+							design.item.updateSize($w, $h);
+
+							var svg = e.find('svg'),
+							view = svg[0].getAttributeNS(null, 'viewBox');
+							var arr = view.split(' ');
+							//var y = txt[0].getAttributeNS(null, 'y');
+							//y = Math.round(y) + Math.round(size2.top) - Math.round(size1.top) - ( (Math.round(size2.top) - Math.round(size1.top)) * (($w - arr[2])/$w) );
+							//if (y < 0) y = '';
+							var y = (size2.top - size1.top) * arr[3] / $h;
+							txt[0].setAttributeNS(null, 'y', y);
+						}
+
 						e.css('transform', 'rotate('+rotate+'rad)');
-						
+
 						jQuery(document).triggerHandler( "beforechangefont.item.design", [$w, $h]);
 					}, 200);
-					
+
 					design.text.baseencode(title, 'google');
 				}
 				else
 				{
 					var filename = jQuery(e).data('filename');
-					var url = jQuery(e).data('url');					
+					var url = jQuery(e).data('url');
 					if (filename != '')
 					{
-						var item = eval ("(" + filename + ")");													
+						var item = eval ("(" + filename + ")");
 						design.designer.fontActive[id] = title;
-						var css = "<style type='text/css'>@font-face{font-family:'"+title+"';font-style: normal; font-weight: 400;src: local('"+title+"'), local('"+title+"'), url("+url+item.woff+") format('woff');}</style>";						
+						var css = "<style type='text/css'>@font-face{font-family:'"+title+"';font-style: normal; font-weight: 400;src: local('"+title+"'), local('"+title+"'), url("+url+item.woff+") format('woff');}</style>";
 						design.fonts = design.fonts + ' '+css;
 						jQuery('head').append(css);
-						
+
 						var e = design.item.get();
-						var svg = e.find('svg');							
+						var svg = e.find('svg');
 						design.text.update('fontfamily', title);
 						jQuery('.labView.active .content-inner').removeClass('loading');
 						setTimeout(function(){
 							var rotate = e.data('rotate');
 							if (rotate == 'undefined') rotate = 0;
 							rotate = rotate * Math.PI / 180;
-							e.css('transform', 'rotate(0rad)');							
-							
+							e.css('transform', 'rotate(0rad)');
+
 							var txt = e.find('text');
 							txt[0].setAttributeNS(null, 'y', 0);
 							var size1 = txt[0].getBoundingClientRect();
 							var size2 = e[0].getBoundingClientRect();
-							var $w 	= parseInt(size1.width);							
-							var $h 	= parseInt(size1.height);							
-							
+							var $w 	= parseInt(size1.width);
+							var $h 	= parseInt(size1.height);
+
 							design.item.updateSize($w, $h);
 
 							var svg = e.find('svg'),
 							view = svg[0].getAttributeNS(null, 'viewBox');
-							var arr = view.split(' ');						
-							//var y = txt[0].getAttributeNS(null, 'y');						
-							//y = Math.round(y) + Math.round(size2.top) - Math.round(size1.top) - ( (Math.round(size2.top) - Math.round(size1.top)) * (($w - arr[2])/$w) );						
+							var arr = view.split(' ');
+							//var y = txt[0].getAttributeNS(null, 'y');
+							//y = Math.round(y) + Math.round(size2.top) - Math.round(size1.top) - ( (Math.round(size2.top) - Math.round(size1.top)) * (($w - arr[2])/$w) );
 							var y = (size2.top - size1.top) * arr[3] / $h;
 							txt[0].setAttributeNS(null, 'y', y);
-							
+
 							e.css('transform', 'rotate('+rotate+'rad)');
-							
+
 							jQuery(document).triggerHandler( "beforechangefont.item.design", [$w, $h]);
 						}, 200);
-						
+
 						design.text.baseencode(title, url+item.ttf);
 					}
 				}
@@ -1930,7 +1975,7 @@ var design={
 			var check = false;
 			jQuery('#product-attributes .size-number').each(function(){
 				var value = jQuery(this).val();
-				if (value == '') 
+				if (value == '')
 				{
 					jQuery(this).val('');
 					value = 0;
@@ -1942,7 +1987,7 @@ var design={
 				sizes = parseInt(sizes) + parseInt(value);
 				check = true;
 			});
-			
+
 			jQuery(document).triggerHandler( "sizes.product.design", sizes);
 			if (sizes < 0) sizes = 0;
 			if(min_order != undefined && min_order != '' && check == false)
@@ -2010,7 +2055,7 @@ var design={
 					if(typeof index == 'undefined')
 						index = 0;
 					design.products.changeColor(this, index);
-					jQuery('.product-color-active-value').html('<a href="javascript:void(0);" style="background-color:#'+hexcolor+'; width: 23px;"></a>');
+					jQuery('.product-color-active-value').html('<a href="javascript:void(0);" style="background-color:#'+hexcolor+'; width: 34px;"></a>');
 				}
 			});
 		},
@@ -2018,18 +2063,19 @@ var design={
 			design.item.unselect();
 			design.changeViewEventFlg = true;
 			jQuery('#product-thumbs a').removeClass('active');
-			jQuery(e).addClass('active');			
+			jQuery(e).addClass('active');
 			jQuery('#app-wrap .labView').removeClass('active');
 			jQuery('#app-wrap .labView').css('display', '');
 			jQuery('#view-'+postion).addClass('active');
+			jQuery('#view-thumb-'+postion).addClass('active');
 			design.layers.setup();
 			design.team.changeView();
-			
+
 			jQuery(document).triggerHandler( "changeView.product.design", e);
 		},
 		viewActive: function(){
 			var id = jQuery('.labView.active').attr('id');
-			
+
 			var view = 'front';
 			if ( typeof id != 'undefined' )
 			{
@@ -2039,13 +2085,20 @@ var design={
 		},
 		changeColor: function(e, n)
 		{
+			var a = jQuery('#product-thumbs a.active');
+			var v = a.attr('id');
+			if (typeof v === 'undefined') {
+				v = 'front';
+			}
+			v = v.replace('view-thumb-', '');
+
 			if (jQuery('.labView.active .design-area').hasClass('zoom'))
 				design.tools.zoom();
 			jQuery('#product-list-colors span').removeClass('active');
 			jQuery(e).addClass('active');
 			design.item.designini(items, n);
-			var a = jQuery('#product-thumbs a');
-			design.products.changeView(a[0], 'front');
+			var a = jQuery('#product-thumbs a#view-thumb-'+v);
+			design.products.changeView(a, v);
 
 			var hex = jQuery(e).data('color');
 			if( jQuery('.div-design-area .is_change_color').length )
@@ -2053,9 +2106,9 @@ var design={
 				jQuery('.div-design-area .is_change_color').css('background-color', '#'+hex);
 				jQuery('#product-thumbs img').css('background-color', '#'+hex);
 			}
-			
+
 			jQuery(document).triggerHandler( "changeColor.product.design", e, n);
-			
+
 			design.ajax.getPrice();
 		},
 		changeDesign: function(e, id){
@@ -2066,22 +2119,22 @@ var design={
 			var a = document.getElementById('product-thumbs').getElementsByTagName('a');
 			this.changeView(a[0], 'front');
 			jQuery('#app-wrap .product-design').html('');
-			
+
 			if(typeof id == 'undefined')
 			{
 				var ids = jQuery('.product-detail.active').attr('id');
 				var id = ids.replace('product-detail-', '');
 			}
 			product_id = id;
-			
+
 			if (typeof this.product[product_id] == 'undefined') return;
-			
+
 			var product = this.product[product_id];
-			
+
 			jQuery(document).triggerHandler("before.product.change.design", product);
 
 			items['design'] = {};
-			parent_id = product.parent_id;			
+			parent_id = product.parent_id;
 			print_type = product.print_type;
 			min_order = product.min_order;
 			max_order = product.max_order;
@@ -2103,35 +2156,35 @@ var design={
 					span.setAttribute('data-placement', 'top');
 					span.setAttribute('data-color', color);
 					span.setAttribute('onclick', 'design.products.changeColor(this, '+i+')');
-					
+
 					var colors_hex = color.split(';');
 					var a_width = 34/colors_hex.length;
 					for(jc=0; jc<colors_hex.length; jc++)
 					{
 						var a_color = document.createElement('a');
 							a_color.setAttribute('href', 'javascript:void(0);');
-							
+
 						a_color.style.backgroundColor = '#' + colors_hex[jc];
 						a_color.style.width = a_width+'px';
 						span.appendChild(a_color);
 					}
 				list_color.append(span);
-				
+
 				items['design'][i] = {};
 				items['design'][i]['color'] = color;
 				items['design'][i]['title'] = product.design.color_title[i];
 				if (typeof product.design.front[i] != 'undefined')
 					items['design'][i]['front'] = product.design.front[i];
 				else items['design'][i]['front'] = '';
-				
+
 				if (typeof product.design.back != 'undefined' && typeof product.design.back[i] != 'undefined')
 					items['design'][i]['back'] = product.design.back[i];
 				else items['design'][i]['back'] = '';
-				
+
 				if (typeof product.design.left != 'undefined' && typeof product.design.left[i] != 'undefined')
 					items['design'][i]['left'] = product.design.left[i];
 				else items['design'][i]['left'] = '';
-				
+
 				if (typeof product.design.right != 'undefined' && typeof product.design.right[i] != 'undefined')
 					items['design'][i]['right'] = product.design.right[i];
 				else items['design'][i]['right'] = '';
@@ -2152,11 +2205,10 @@ var design={
 			});
 
 			jQuery('#product-attributes').html(product.attribute);
-			
 			design.item.designini(items);
 			jQuery('#dg-products').modal('hide');
 			jQuery('.dg-tooltip').tooltip();
-			
+
 			if (jQuery('#product-attributes .size-number').length > 0)
 			{
 				var min_quantity = jQuery('#quantity').val();
@@ -2169,57 +2221,63 @@ var design={
 					design.ajax.getPrice();
 				}, 100);
 			}
-			
-			
+
 			jQuery('#product-attributes .size-number').keyup(function(){
 				design.products.sizes();
 			});
-			
+
 			jQuery('#quantity').keyup(function(e){
 				design.ajax.getPrice();
 				var code = e.keyCode || e.which;
-				if (code == 13) { 
+				if (code == 13) {
 					e.preventDefault();
 					return false;
-				}				
+				}
 			});
 
 			if(product.image == '') product.image = 'assets/images/photo.png';
-			
+
 			jQuery(document).triggerHandler("change.product.design", product);
 			jQuery(document).triggerHandler("product.change.design", product);
-			
+
 			design.team.setup();
 			design.team.save();
 			design.products.discount(product);
-			
+
 			// fix add quantity when change product.
 			if(jQuery('#quantity').val() == 0)
 				jQuery('#quantity').val(min_order);
-			
+
 			design.team.changeSize();
 			jQuery('#product-attributes .size-number').click(function(){
 				design.team.changeSize();
 			});
-			
+
+			var a = jQuery('#product-thumbs a');
+			design.products.changeView(a[0], 'front');
+
 			design.ajax.getPrice();
-			jQuery('#modal-product-info .product-detail-image').attr('src', baseURL + product.image);
+			jQuery('.product-detail-image').attr('src', baseURL + product.image);
 			jQuery('#modal-product-info .product-detail-description').html(product.description);
-			jQuery('#modal-product-info .product-detail-title').html(product.title);
+			jQuery('.product-detail-title').html(product.title);
 			jQuery('#modal-product-info .product-detail-id').html(product.id);
 			jQuery('#modal-product-info .product-detail-sku').html(product.sku);
 			jQuery('#modal-product-info .product-detail-short_description').html(product.short_description);
 			jQuery('.product-detail-size').html(product.size);
-								
+			if (typeof product.size == 'undefined' || product.size == '') {
+				jQuery('a[data-target="#modal-product-size"]').css('display', 'none');
+			} else {
+				jQuery('a[data-target="#modal-product-size"]').css('display', 'block');
+			}
 		},
 		changeProduct: function(e, product){
 			var id 	= jQuery(e).data('id');
 			jQuery('.product-list .product-box').removeClass('active');
 			jQuery(e).addClass('active');
 			jQuery('.product-list .img-thumbnail').css('boder', '1px solid #ddd');
-			jQuery(e).find('.img-thumbnail').css('boder', '1px solid #007aff');			
+			jQuery(e).find('.img-thumbnail').css('boder', '1px solid #007aff');
 			if (document.getElementById('product-detail-' + id) == null)
-			{			
+			{
 				var div = document.createElement('div');
 					div.className = 'product-detail';
 					div.setAttribute('id', 'product-detail-' + product.id);
@@ -2233,7 +2291,7 @@ var design={
 					html = html + 			'<p>'+lang.product.sku+' '+product.sku+'</p>';
 					html = html + 		'</div>';
 					html = html + 	'</div>';
-					
+
 					html = html + 	'<div class="row col-sm-12">';
 					html = html + 		'<h4>'+lang.product.description+'</h4>';
 					html = html + 		'<div class="box-product-description">'+product.description+'</div>';
@@ -2245,7 +2303,18 @@ var design={
 			jQuery('#dg-products .products-detail').show('slow');
 			jQuery('#dg-products .product-list').hide();
 			jQuery('#loading-change-product').show();
-			
+
+			if(jQuery('#product-thumbs .box-thumb').length < 2)
+			{
+				jQuery('#product-thumbs').hide();
+				jQuery('#app-wrap .control-views').hide();
+			}
+			else
+			{
+				jQuery('#product-thumbs').show();
+				jQuery('#app-wrap .control-views').show();
+			}
+
 			jQuery(document).triggerHandler( "changeProduct.product.design", [e, product]);
 		},
 		productCate: function(id){
@@ -2259,43 +2328,47 @@ var design={
 					type: "POST",
 					dataType: "json",
 					url: mainURL + url_ajax_product,
-					data: { id: id, lang: lang_active }
+					data: { id: id, lang: lang_active },
+					beforeSend: function() {
+						jQuery('#dg-products .modal-body .product-list').css('display', 'none');
+					}
 				}).done(function( data ) {
 					jQuery.each(data.products, function(i, product){
 						if(product.image == '') product.image = 'assets/images/photo.png';
 						seft.product[product.id] = product;
 					});
 					seft.products[id] = data.products;
-					seft.addProduct(data.products);			
+					seft.addProduct(data.products);
 				}).always(function(){
 					jQuery('#dg-products .modal-body').removeClass('loading');
+					jQuery('#dg-products .modal-body .product-list').css('display', 'block');
 				});
 			}
 		},
-		addProduct: function(products){							
-			
+		addProduct: function(products){
+
 			jQuery('.product-list').html('');
-			
+
 			if (products.length == 0) return;
-			
+
 			var seft = this;
 			jQuery.each(products, function(i, product){
 				var div = document.createElement('div');
 					div.setAttribute('data-id', product.id);
 					div.className = 'product-box col-xs-6 col-sm-4 col-md-3';
-				jQuery(div).click(function(){ 
+				jQuery(div).click(function(){
 					//seft.changeProduct(this, product);
 					design.products.changeDesign(null, product.id);
-				});			
-				
+				});
+
 				html = '<div class="thumbnail"><img src="'+product.image+'" alt="'+product.title+'" class="img-responsive"> <div class="caption">' + product.title +'</div></div>';
 					div.innerHTML = html;
-				
+
 				jQuery('.product-list').append(div);
 			});
 		},
 		changeCategory: function(e)
-		{	
+		{
 			jQuery('#close-product-detail').trigger('click');
 			this.childCate(e);
 			var level = jQuery(e).attr('data-level'),
@@ -2338,25 +2411,25 @@ var design={
 			var value = jQuery(e).val(),
 				data = {},
 				j = 0;
-				
+
 			jQuery.each(categories, function(i, cate){
 				if (cate.parent_id == value && cate.parent_id > 0){
 					data[j]	= cate;
 					j++;
 				}
-			});			
+			});
 			if (j>0){
 				this.removeCate(level);
-				
+
 				if (document.getElementById('parent-categories-' + level)){
-					var html = '<option value="0"> '+lang.designer.category+' </option>';						
-						
+					var html = '<option value="0"> '+lang.designer.category+' </option>';
+
 					jQuery.each(data, function(i, category){
 						html = html + '<option value="'+category.id+'">'+category.title+'</option>';
 					});
-					
+
 					jQuery('#parent-categories-' + level).html(html);
-				} 
+				}
 				else
 				{
 					var div = document.createElement('div');
@@ -2366,19 +2439,19 @@ var design={
 						div.className = 'col-xs-4 col-md-3';
 					var select = '<select id="parent-categories-'+level+'" data-level="'+level+'" onchange="design.products.changeCategory(this)" class="form-control input-sm">';
 						select = select + '<option value="0"> '+lang.designer.category+' </option>';
-					
+
 					jQuery.each(data, function(i, category){
 						select = select + '<option value="'+category.id+'">'+category.title+'</option>';
 					});
-					
+
 					select = select + '</select>';
-					
+
 					div.innerHTML = select;
 					jQuery('#list-categories').append(div);
 				}
 			}else{
 				this.removeCate(level-1);
-			}			
+			}
 		},
 		removeCate: function(level){
 			jQuery('#list-categories select').each(function(){
@@ -2402,13 +2475,13 @@ var design={
 				e[0].item.text = value;
 				var tspan = e.find('tspan');
 				tspan[0].textContent = value;
-				design.text.setSize(e);				
+				design.text.setSize(e);
 			}
 			else
-			{				
+			{
 				jQuery('#txt-team-fontfamly').html(e.item.fontFamily);
 				jQuery('#team-name-color').data('color', e.item.color.replace('#', '')).css('background-color', e.item.color);
-			}			
+			}
 		},
 		load: function(teams){
 			var $this = this;
@@ -2427,7 +2500,7 @@ var design={
 				}
 			}
 		},
-		changeView: function(){			
+		changeView: function(){
 			if (jQuery('.labView.active .drag-item-name').length > 0)
 			{
 				document.getElementById('team_add_name').checked = true;
@@ -2442,7 +2515,7 @@ var design={
 				document.getElementById('team_add_name').checked = false;
 				jQuery('#team-edit-name').val('NAME');
 			}
-				
+
 			if (jQuery('.labView.active .drag-item-number').length > 0)
 			{
 				document.getElementById('team_add_number').checked = true;
@@ -2483,7 +2556,7 @@ var design={
 				o.addClass('drag-item-name');
 				o[0].item.isName = true;
 				jQuery(document).triggerHandler("name.add.team.design", o);
-				
+
 				design.popover('add_item_team');
 			}
 			else
@@ -2544,7 +2617,7 @@ var design={
 			}
 			var sizes = this.sizes(team.size);
 			var html = '<tr>'
-					 + 	'<td>'+i+'</td>'					 
+					 + 	'<td>'+i+'</td>'
 					 + 	'<td>'
 					 + 		'<input type="text" class="form-control input-sm" value="'+team.name+'" placeholder="'+lang.team.name+'">'
 					 + 	'</td>'
@@ -2577,10 +2650,10 @@ var design={
 		},
 		sizes: function(size){
 			var options =  '';
-			jQuery('.p-color-sizes').each(function(){
+			jQuery('#product-attributes .p-color-sizes').each(function(){
 				var groupName = jQuery(this).parent().parent().children('label').text();
 				options = options + '<optgroup label="'+groupName+'">';
-				
+
 				jQuery(this).find('.size-number').each(function(){
 					var value = jQuery(this).attr('name');
 					value = value.replace('][', '-');
@@ -2594,7 +2667,7 @@ var design={
 					else
 						options = options + '<option value="'+lable+'::'+value+'">'+lable+'</option>';
 				});
-				
+
 				options = options + '</optgroup>';
 			});
 			if (options == '')
@@ -2615,7 +2688,7 @@ var design={
 				return false;
 			}
 		},
-		save: function(){			
+		save: function(){
 			var teams 			= {};
 				teams.name 		= {};
 				teams.number 	= {};
@@ -2626,14 +2699,14 @@ var design={
 				var name = jQuery(td[1]).find('input').val();
 				var number = jQuery(td[2]).find('input').val();
 				var size = jQuery(td[3]).find('select').val();
-				if (name == '' || number == '')
+				if (name == '' && number == '')
 				{
 					checked = false;
 				}
 				teams.name[i] = name;
 				teams.number[i] = number;
 				teams.size[i] = size;
-				
+
 				i++;
 			});
 			if (checked == false)
@@ -2648,7 +2721,7 @@ var design={
 			}
 			design.teams = teams;
 		},
-		tableView: function(teams){			
+		tableView: function(teams){
 			if (typeof teams.name != 'undefined')
 			{
 				var sizes = {}, n=0;
@@ -2664,7 +2737,7 @@ var design={
 					{
 						var temp = teams.size[i].split('::');
 					}
-					
+
 					var html = '<tr>'
 							+  	'<td>'+teams.name[i]+'</td>'
 							+  	'<td>'+teams.number[i]+'</td>'
@@ -2675,10 +2748,10 @@ var design={
 						sizes[teams.size[i]] = [];
 					sizes[teams.size[i]].push(i);
 				});
-				
-				if (jQuery('.size-number').length > 0)
+
+				if (jQuery('#product-attributes .size-number').length > 0)
 				{
-					jQuery('.size-number').each(function(){
+					jQuery('#product-attributes .size-number').each(function(){
 						var lable = jQuery(this).parents('li').find('label').data('id');
 						var value = jQuery(this).attr('name');
 							value = value.replace('][', '-');
@@ -2686,7 +2759,7 @@ var design={
 							value = value.replace(']', '');
 							value = value.replace('[', '');
 							value = value.replace('attribute', '');
-							
+
 						if (typeof sizes[lable+'::'+value] != 'undefined')
 							jQuery(this).val(Object.keys(sizes[lable+'::'+value]).length);
 						else
@@ -2701,7 +2774,7 @@ var design={
 					});
 				}
 			}
-			if (jQuery('.size-number').length > 0)
+			if (jQuery('#product-attributes .size-number').length > 0)
 			{
 				design.products.sizes();
 			}
@@ -2722,23 +2795,23 @@ var design={
 				o.stroke 		= $jd('#dg-outline-color').css('background-color');
 				o.strokeWidth 	= outline/10;
 			}
-			o.spacing 		= '0';			
+			o.spacing 		= '0';
 			return o;
-		},		
+		},
 		create: function(){
 			$jd('.ui-lock').attr('checked', false);
 			var txt = {};
-			
+
 			txt.text = 'Hello';
 			txt.color = '#FF0000';
 			txt.fontSize = '24px';
 			txt.fontFamily = 'arial';
 			txt.stroke = 'none';
 			txt.strokew = '0';
-			
+
 			jQuery(document).triggerHandler( "before.add.text.design", txt);
-			
-			this.add(txt);			
+
+			this.add(txt);
 		},
 		setValue: function(o){
 			$jd('#enter-text').val(o.text);
@@ -2746,27 +2819,27 @@ var design={
 			var color = $jd('#txt-color');
 				color.data('color', o.color);
 				color.css('background-color', o.color);
-				
+
 			if (typeof o.align == 'undefined')
 				o.align = 'center';
 			jQuery('#text-align span').removeClass('active');
 			jQuery('#text-align-'+o.align).addClass('active');
-			
+
 			if (typeof o.Istyle != 'undefined' && o.Istyle == 'italic')
 				jQuery('#text-style-i').addClass('active');
 			else
 				jQuery('#text-style-i').removeClass('active');
-			
+
 			if (typeof o.weight != 'undefined' && o.weight == 'bold')
 				jQuery('#text-style-b').addClass('active');
 			else
 				jQuery('#text-style-b').removeClass('active');
-				
+
 			if (typeof o.decoration != 'undefined' && o.decoration == 'underline')
 				jQuery('#text-style-u').addClass('active');
 			else
 				jQuery('#text-style-u').removeClass('active');
-		
+
 			if (typeof o.color != 'undefined')
 			{
 				var obj = jQuery('#txt-color');
@@ -2774,12 +2847,12 @@ var design={
 					obj.addClass('bg-none');
 				else
 					obj.removeClass('bg-none');
-					
+
 				obj.data('color', o.color);
 				obj.data('value', o.color);
 				obj.css('background-color', '#'+o.color);
 			}
-			
+
 			if (typeof o.outlineC == 'undefined')
 			{
 				o.outlineC	= 'none';
@@ -2789,18 +2862,18 @@ var design={
 				obj.addClass('bg-none');
 			else
 				obj.removeClass('bg-none');
-				
+
 			obj.data('color', o.outlineC);
 			obj.data('value', o.outlineC);
-			obj.css('background-color', '#'+o.outlineC);					
-			
+			obj.css('background-color', '#'+o.outlineC);
+
 			if (typeof o.outlineW == 'undefined')
 			{
 				o.outlineW = 0;
 			}
 			jQuery('.outline-value.pull-left').html(o.outlineW);
 			jQuery('#dg-outline-width a').css('left', o.outlineW + '%');
-			
+
 			jQuery(document).triggerHandler( "setValue.text.design", o);
 		},
 		add: function(o, type){
@@ -2823,7 +2896,7 @@ var design={
 					item.edit = o.fn.edit;
 				if (typeof o.fn != 'undefined' && typeof o.fn.remove != 'undefined')
 					item.remove = o.fn.remove;
-				
+
 				item.text 		= o.text;
 				item.fontFamily = o.fontFamily;
 				item.color 		= o.color;
@@ -2837,7 +2910,7 @@ var design={
 			}else{
 				var o = this.getValue();
 			}
-			
+
 			var div = document.createElement('div');
 			var node = document.createTextNode(o.text);
 				div.appendChild(node);
@@ -2853,24 +2926,24 @@ var design={
 			tspan 		= document.createElementNS(svgNS, 'tspan'),
 			text 		= document.createElementNS(svgNS, 'text'),
 			content 	= document.createTextNode(o.text);
-			
+
 			tspan.setAttributeNS(null, 'x', '50%');
 			tspan.setAttributeNS(null, 'dy', 0);
-							
+
 			text.setAttributeNS(null, 'fill', o.color);
 			text.setAttributeNS(null, 'stroke', o.stroke);
 			text.setAttributeNS(null, 'stroke-width', o.strokew);
 			text.setAttributeNS(null, 'stroke-linecap', 'round');
 			text.setAttributeNS(null, 'stroke-linejoin', 'round');
 			text.setAttributeNS(null, 'x', parseInt($width/2));
-			text.setAttributeNS(null, 'y', 20);				
-			text.setAttributeNS(null, 'text-anchor', 'middle');				
+			text.setAttributeNS(null, 'y', 20);
+			text.setAttributeNS(null, 'text-anchor', 'middle');
 			text.setAttributeNS(null, 'font-size', o.fontSize);
 			text.setAttributeNS(null, 'font-family', o.fontFamily);
-			
+
 			if(typeof o.fontWeight != 'undefined')
 			text.setAttributeNS(null, 'font-weight', o.fontWeight);
-			
+
 			if(typeof o.strokeWidth != 'undefined' && o.strokeWidth != 0){
 				text.setAttributeNS(null, 'stroke', o.stroke);
 				text.setAttributeNS(null, 'stroke-width', o.strokeWidth);
@@ -2883,27 +2956,27 @@ var design={
 			}
 			tspan.appendChild(content);
 			text.appendChild(tspan);
-			
+
 			var g = document.createElementNS(svgNS, 'g');
 				g.id = Math.random();
 			g.appendChild(text);
-			
+
 			var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 			svg.setAttributeNS(null, 'width', $width);
 			svg.setAttributeNS(null, 'height', $height);
-			svg.setAttributeNS(null, 'viewBox', '0 0 '+$width+' '+$height);			
+			svg.setAttributeNS(null, 'viewBox', '0 0 '+$width+' '+$height);
 			svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 			svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
 			svg.appendChild(g);
-			
+
 			item.width = $width;
 			item.height = $height;
 			item.file = '';
 			item.confirmColor	= false;
 			item.svg = svg;
-			
+
 			design.item.create(item);
-			
+
 			jQuery(document).triggerHandler( "after.add.text.design", item);
 		},
 		update: function(lable, value){
@@ -2917,28 +2990,31 @@ var design={
 				var e = design.item.get();
 			}
 			if(typeof e[0] == 'undefined') return false;
-			var txt = e.find('text');		
+			var txt = e.find('text');
 			if(typeof lable != 'undefined' && lable != '')
 			{
 				var rotate = e.data('rotate');
 				if (rotate == 'undefined') rotate = 0;
 				rotate = rotate * Math.PI / 180;
 				e.css('transform', 'rotate(0rad)');
-			
+
 				var obj = document.getElementById(e.attr('id'));
 				switch(lable){
 					case 'fontfamily':
+						if (typeof txt[0] == 'undefined') {
+							break;
+						}
 						txt[0].setAttributeNS(null, 'font-family', value);
 						obj.item.fontFamily = value;
 						if (obj.item.type == 'text')
 						{
 							jQuery('#txt-fontfamly').html(value);
 							jQuery('#txt-fontfamily').css('font-family', value);
-						}							
+						}
 						else
 						{
 							jQuery('#txt-team-fontfamly').html(value);
-						}							
+						}
 						break;
 					case 'color':
 						var color = $jd('#txt-color').data('value');
@@ -2972,30 +3048,31 @@ var design={
 						text = text.replace('\n\n', '\n');
 						if(text.indexOf('\n') == 0)
 							text = text.substring(1, text.lenght);
-						
+
 						$jd('#enter-text').val(text); // Fix text when create some space line.
-						
+
 						if (text == '') break;
 						obj.item.text = text;
 						var texts = text.split('\n');
-						var svgNS 	= "http://www.w3.org/2000/svg";						
+						var svgNS 	= "http://www.w3.org/2000/svg";
 						txt[0].textContent = '';
 						var fontSize = txt[0].getAttribute('font-size').split('px');
 						for (var i = 0; i < texts.length; i++) {
 							if(texts[i] == '' && typeof(texts[i+1]) == 'undefined') // Remove space line end.
 								continue;
-							
+
 							var tspan 	= document.createElementNS(svgNS, 'tspan');
 							var dy = 0;
 							if(i> 0) dy = fontSize[0];
 								tspan.setAttributeNS(null, 'dy', dy);
 								tspan.setAttributeNS(null, 'x', '50%');
-							var content 	= document.createTextNode(texts[i]);	
+							var content 	= document.createTextNode(texts[i]);
 							tspan.appendChild(content);
 							txt[0].appendChild(tspan);
 						}
 						jQuery('.layer.active textarea').val(text).attr('rows', texts.length);
 						jQuery('.layer.active span').attr('title', text);
+						jQuery('.layer.active span').text(text);
 						this.setSize(e);
 
 						if(align == 'left')
@@ -3005,8 +3082,8 @@ var design={
 						else if(align == 'right')
 						{
 							this.update('alignR', '');
-						}						
-						break;						
+						}
+						break;
 					case 'alignL':
 						obj.item.align = 'left';
 						design.text.align(e, 'left');
@@ -3071,11 +3148,11 @@ var design={
 						if (value == 'none') var hex = value;
 						else var hex = '#' + value;
 						txt[0].setAttributeNS(null, 'stroke', hex);
-						
+
 						var colors = obj.item.colors;
 						colors[1] = hex;
 						obj.item.colors = colors;
-						
+
 						txt[0].setAttributeNS(null, 'stroke-width', $jd('.outline-value').html()/50);
 						obj.item.outlineC = hex;
 						break;
@@ -3101,18 +3178,18 @@ var design={
 			var $w 	= parseInt(txt[0].getBoundingClientRect().width);
 			var $h 	= parseInt(txt[0].getBoundingClientRect().height);
 			e.css('width', $w + 'px');
-			e.css('height', $h + 'px');						
+			e.css('height', $h + 'px');
 			var svg = e.find('svg'),
 				width = svg[0].getAttribute('width'),
 				height = svg[0].getAttribute('height'),
 				view = svg[0].getAttribute('viewBox').split(' '),
 				vw = (view[2] * $w)/width,
-				vh = (view[3] * $h)/height;			
+				vh = (view[3] * $h)/height;
 			svg[0].setAttributeNS(null, 'width', $w);
 			svg[0].setAttributeNS(null, 'height', $h);
-			
+
 			svg[0].setAttributeNS(null, 'viewBox', '0 0 '+vw +' '+ vh);
-			
+
 			/* setup Y */
 			txt[0].setAttributeNS(null, 'y', 0);
 			var size1 = txt[0].getBoundingClientRect();
@@ -3120,12 +3197,12 @@ var design={
 			var svg = e.find('svg'),
 			view = svg[0].getAttributeNS(null, 'viewBox');
 			var arr = view.split(' ');
-						
+
 			var y = (size2.top - size1.top) * vh / $h;
 			txt[0].setAttributeNS(null, 'y', y);
-						
+
 			jQuery(document).triggerHandler( "size.update.text.design", [$w, $h]);
-		},		
+		},
 		align: function(e, type){
 			var span = $jd('#text-align-'+type);
 			var txt = e.find('text');
@@ -3144,9 +3221,9 @@ var design={
 					txt[0].setAttributeNS(null, 'text-anchor', 'start');
 				else if(type == 'right')
 					txt[0].setAttributeNS(null, 'text-anchor', 'end');
-				else 
+				else
 					txt[0].setAttributeNS(null, 'text-anchor', 'middle');
-				
+
 				for(i=0; i<tspan.length; i++){
 					if(type == 'left')
 						tspan[i].setAttributeNS(null, 'x', '0');
@@ -3208,30 +3285,34 @@ var design={
 			});
 		},
 		create: function(e){
-			var item = e.item;
-			$jd('.ui-lock').attr('checked', false);			
-			var o 			= item;
-			o.type 			= 'clipart';			
-			o.upload		= 1;			
+			var item 		= e.item;
+			$jd('.ui-lock').attr('checked', false);
+			var o 			= {};
+			jQuery.each(item, function(key, value){
+				o[key] = value;
+			});
+
+			o.type 			= 'clipart';
+			o.upload		= 1;
 			o.title 		= item.title;
-			o.url 		= item.url;
-			o.file_name 	= item.file_name;			
-			o.thumb		= item.thumb;
+			o.url 			= item.url;
+			o.file_name 	= item.file_name;
+			o.thumb			= item.thumb;
 			o.confirmColor	= true;
 			o.remove 		= true;
-			o.edit 		= false;
-			o.rotate 		= true;	
+			o.edit 			= false;
+			o.rotate 		= true;
 			o.rotate 		= true;
 
 			if(typeof item.layer != 'undefined')
 			{
 				o.layer = item.layer;
 			}
-			
+
 			if (item.file_type != 'svg')
 			{
 				o.file		= {};
-				o.file.type	= 'image';				
+				o.file.type	= 'image';
 				var img = new Image();
 				design.mask(true);
 				img.onload = function() {
@@ -3239,25 +3320,25 @@ var design={
 					o.height	= this.height;
 					if (this.width > 100)
 					{
-						o.width 	= 100;						
+						o.width 	= 100;
 						o.height 	= (100/this.width) * this.height;
 					}
-					o.change_color = 0;					
-						
+					o.change_color = 0;
+
 					jQuery(document).triggerHandler( "myitem.create.item.design", o);
 
 					var content = '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="'+o.width+'" height="'+o.height+'" preserveAspectRatio="none" xmlns:xlink="http://www.w3.org/1999/xlink">'
 								 + '<g><image x="0" y="0" width="'+o.width+'" height="'+o.height+'" preserveAspectRatio="none" xlink:href="'+item.thumb+'" /></g>'
 								 + '</svg>';
 					o.svg 		= jQuery.parseHTML(content);
-					
+
 					if(typeof o.stoped != 'undefined' && o.stoped == 1)
 					{
 						$jd('#dg-myclipart').modal('hide');
 						design.mask(false);
 						return false;
 					}
-					
+
 					design.item.create(o);
 					$jd('#dg-myclipart').modal('hide');
 					design.mask(false);
@@ -3279,7 +3360,7 @@ var design={
 				alert_text(lang.text.enter_text);
 				return false;
 			}
-			
+
 			var $btn = jQuery(e).button('loading');
 			jQuery.ajax({
 				url: siteURL + "ajax.php?type=qrcode&text="+txt
@@ -3289,18 +3370,18 @@ var design={
 					img.setAttribute('src', siteURL+data);
 					img.setAttribute('alt', 'QRcode');
 					img.setAttribute('title', lang.text.add_qrcode);
-				
+
 				var fileName = data.split('/');
-				
+
 				var item = {};
 					item.title = lang.text.qrcode;
 					item.url = siteURL+data;
 					item.file_name = fileName[fileName.length - 1];
 					item.thumb = siteURL+data;
 					item.file_type = 'image';
-					
+
 				img.item = item;
-					
+
 				jQuery('#qrcode-img').html(img);
 				$btn.button('reset');
 				jQuery(img).bind('click', function(){
@@ -3313,11 +3394,14 @@ var design={
 	},
 	art:{
 		create: function(e){
-			var item = e.item;
+			var item = {};
+			jQuery.each(e.item, function(key, value){
+				item[key] = value;
+			});
 			$jd('.ui-lock').attr('checked', false);
 			var o 		= item;
-			o.type 		= 'clipart';			
-			o.upload 		= 0;			
+			o.type 		= 'clipart';
+			o.upload 		= 0;
 			o.clipart_id 	= jQuery(e).data('clipart_id');
 			o.title 		= item.title;
 			o.url 		= item.url;
@@ -3326,14 +3410,14 @@ var design={
 
 			if(typeof o.thumb == 'undefined')
 			{
-				var img 	= $jd(e).children('img');	
-				o.thumb	= img.attr('src');	
+				var img 	= $jd(e).children('img');
+				o.thumb	= img.attr('src');
 			}
 			o.remove 		= true;
 			o.edit 		= true;
 			o.rotate 		= true;
 			o.confirmColor	= false;
-			
+
 			$jd('#dg-cliparts').modal('hide');
 			$jd('.modal').modal('hide');
 			design.mask(true);
@@ -3343,23 +3427,23 @@ var design={
 				var canvas = document.createElement('canvas');
 				var context = canvas.getContext('2d');
 				var img = new Image();
-				img.onload = function() {				  
+				img.onload = function() {
 					o.width 	= 100;
 					o.height	= Math.round((o.width/this.width) * this.height);
 					o.change_color = 0;
 					o.file		= {};
 					o.file.type	= 'image';
-					
+
 					canvas.width = this.width;
 					canvas.height = this.height;
-					
+
 					context.drawImage(img,0,0);
 					context.stroke();
 					var dataURL = canvas.toDataURL();
 					var content = '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" preserveAspectRatio="none" width="'+o.width+'" height="'+o.height+'" xmlns:xlink="http://www.w3.org/1999/xlink">'
 									 + '<g><image x="0" y="0" width="'+o.width+'" preserveAspectRatio="none" height="'+o.height+'" xlink:href="'+dataURL+'" /></g>'
 									 + '</svg>';
-					o.svg 		= jQuery.parseHTML(content);					
+					o.svg 		= jQuery.parseHTML(content);
 					jQuery('#arts-add button').button('reset');
 					design.item.create(o);
 					design.mask(false);
@@ -3372,7 +3456,7 @@ var design={
 				var src = item.imgMedium;
 				src = src.replace('http://', '');
 				src = src.replace('https://', '');
-				img.src = urlCase +'?src='+ src +'&w=250&h=atuto&q=90';				
+				img.src = urlCase +'?src='+ src +'&w=250&h=atuto&q=90';
 			}
 			else
 			{
@@ -3382,13 +3466,13 @@ var design={
 					data: item,
 					url: siteURL + "ajax.php?type=svg",
 					dataType: "json",
-					success: function(data){					
+					success: function(data){
 							o.width 		= data.size.width;
 							o.height		= data.size.height;
-							o.file		= data.info;						
+							o.file		= data.info;
 							o.svg 		= jQuery.parseHTML(data.content);
 							design.item.create(o);
-							var elm = design.item.get();			
+							var elm = design.item.get();
 							var svg = elm.children('svg');
 							jQuery(svg[0]).removeAttr('style');
 							$jd('.modal').modal('hide');
@@ -3420,14 +3504,14 @@ var design={
 					/* this.setAttributeNS(null, o.type, hex); */
 					jQuery(this).attr(o.type, hex);
 				});
-			}			
+			}
 		},
 		restore: function(){
 			var e = design.item.get();
 			//var html = e.data('content');
 			//var o = e.children('svg');
 		},
-		update: function(e){			
+		update: function(e){
 			design.item.setup(e.item);
 		}
 	},
@@ -3440,13 +3524,13 @@ var design={
 				else var check = false;
 				var thumbs = jQuery('#product-thumbs');
 				jQuery(thumbs).html('');
-				
+
 				var postions = ['front', 'back', 'left', 'right'];
-				var value	= items.design[color];				
+				var value	= items.design[color];
 				jQuery.each(postions, function(i, view){
 					if (value[view] != '' && value[view].length > 0)
 					{
-						var item = eval ("(" + value[view] + ")");						
+						var item = eval ("(" + value[view] + ")");
 						var o = jQuery('#view-'+view);
 						var images = jQuery(o).children('.product-design');
 						jQuery(images).html('');
@@ -3460,13 +3544,13 @@ var design={
 									img.className = 'modelImage';
 									img.id = view +'-img-'+ e.id;
 									img.setAttribute('src', baseURL + e.img);
-									
+
 									img.style.width	 	= e.width;
 									img.style.height 		= e.height;
 									img.style.top 		= e.top;
 									img.style.left 		= e.left;
 									img.style.zIndex		= e.zIndex;
-									if(typeof e.is_change_color != 'undefined' && e.is_change_color == 1)
+									if( (typeof e.is_change_color != 'undefined' && e.is_change_color == 1) || (change_bg_product == 'img' && e.is_product != undefined && e.is_change_color == 1) || typeof jQuery('#product-list-colors .bg-more-colors').html() != 'undefined' || (typeof allow_add_page != 'undefined' && allow_add_page == 1))
 									{
 										jQuery(img).addClass('is_change_color');
 									}
@@ -3480,7 +3564,7 @@ var design={
 							o.find('img').removeClass('is_change_color');
 							o.find('.design-area .content-inner').addClass('is_change_color');
 						}
-						
+
 						var a = document.createElement('a');
 						jQuery(a).bind('click', function(){design.products.changeView(this, view)});
 						a.setAttribute('class', 'box-thumb');
@@ -3488,8 +3572,8 @@ var design={
 						a.setAttribute('href', 'javascript:void(0)');
 						a.innerHTML = '<img width="40" height="40" src="'+baseURL+thumbView+'"><span class="help-block">'+lang.text[view]+'</span>';
 						jQuery(thumbs).append(a);
-					}					
-					
+					}
+
 					if (check == true)
 					{
 						var area = items['area'][view];
@@ -3499,7 +3583,18 @@ var design={
 							jQuery(window).css({"height":vector.height, "width":vector.width, "left":vector.left, "top":vector.top, "border-radius":vector.radius, "z-index":vector.zIndex});
 						}
 					}
-				});				
+				});
+
+				if(jQuery('#product-thumbs .box-thumb').length < 2)
+				{
+					jQuery('#product-thumbs').hide();
+					jQuery('#app-wrap .control-views').hide();
+				}
+				else
+				{
+					jQuery('#product-thumbs').show();
+					jQuery('#app-wrap .control-views').show();
+				}
 			}
 		},
 		create: function(item){
@@ -3510,19 +3605,19 @@ var design={
 			}
 			this.unselect();
 			jQuery('.labView.active .design-area').css('overflow', 'visible');
-			var e = $jd('#app-wrap .active .content-inner'),				
+			var e = $jd('#app-wrap .active .content-inner'),
 				span = document.createElement('span');
 			var n = -1;
 			jQuery('#app-wrap .drag-item').each(function(){
 				var index 	= jQuery(this).attr('id').replace('item-', '');
 				if (index > n) n = parseInt(index);
-			});			
-			var n = n + 1;			
-			
+			});
+			var n = n + 1;
+
 			span.className 	= 'drag-item';
 			span.id 		= 'item-'+n;
 			span.item 		= item;
-			item.id 		= n;			
+			item.id 		= n;
 			jQuery(span).bind('click', function(e){design.item.select(this); e.stopPropagation();});
 			var center = this.align.center(item);
 			span.style.left = center.left + 'px';
@@ -3561,21 +3656,21 @@ var design={
 			}
 			span.style.width 	= item.width+'px';
 			span.style.height 	= item.height+'px';
-			
+
 			jQuery(span).data('id', item.id);
 			jQuery(span).data('type', item.type);
 			jQuery(span).data('file', item.file);
 			jQuery(span).data('width', item.width);
 			jQuery(span).data('height', item.height);
-			
+
 			design.zIndex  	= parseInt(design.zIndex) + 5;
 			span.style.zIndex = design.zIndex;
 			span.style.width = item.width;
 			span.style.height = item.height;
-			
+
 			jQuery(document).triggerHandler( "before.create.item.design", span);
-			jQuery(span).append(item.svg);			
-			
+			jQuery(span).append(item.svg);
+
 			if(item.change_color == 1)
 			{
 				jQuery('#clipart-colors').css('display', 'block');
@@ -3586,16 +3681,16 @@ var design={
 				jQuery('#clipart-colors').css('display', 'none');
 				jQuery('.btn-action-colors').css('display', 'none');
 			}
-			
+
 			if(item.remove == true)
 			{
 				var remove = document.createElement('div');
 				remove.className = 'item-remove-on glyphicons bin';
 				remove.setAttribute('title', lang.text.remove);
 				remove.setAttribute('onclick', 'design.item.remove(this)');
-				jQuery(span).append(remove);				
+				jQuery(span).append(remove);
 			}
-			
+
 			if(item.edit == true)
 			{
 				var edit = document.createElement('div');
@@ -3603,34 +3698,35 @@ var design={
 				edit.setAttribute('title', lang.text.edit);
 				edit.setAttribute('onclick', 'design.item.edit(this)');
 				jQuery(span).append(edit);
-			}	
-			
+			}
+
 			e.append(span);
-					
+
 			this.move($jd(span));
-			this.resize($jd(span));	
+			this.resize($jd(span));
 			if(item.rotate == true)
 				this.rotate($jd(span));
 			design.layers.add(item);
 			this.setup(item);
 			jQuery('.btn-action-edit').css('display', 'none');
-			if (print_type == 'screen' || print_type == 'embroidery')
+			if (typeof prints_confirm_colors != 'undefined' && prints_confirm_colors.length > 0 && print_type.indexOf(print_type) != -1)
 			{
 				if (item.confirmColor == true)
 				{
 					this.setupColorprint(span);
 					jQuery('.btn-action-edit').css('display', 'block');
-				}				
+				}
 			}
 			jQuery(document).triggerHandler( "after.create.item.design", span);
 			this.select(span);
-			design.print.colors();			
+			design.print.colors();
 			design.print.size();
 			design.ajax.getPrice();
+			jQuery(document).triggerHandler( "update.design" );
 		},
-		setupColorprint: function(o){			
+		setupColorprint: function(o){
 			var item = o.item;
-			
+
 			jQuery('#screen_colors_images').html('<img class="img-thumbnail img-responsive" src="'+item.thumb+'">');
 			if (item.colors != 'undefined')
 			{
@@ -3645,8 +3741,8 @@ var design={
 			var id = jQuery(o).attr('id');
 			if (typeof id != 'undefined')
 				jQuery('#screen_colors_body').data('id', id);
-			
-			jQuery('#screen_colors_body').show();			
+
+			jQuery('#screen_colors_body').show();
 		},
 		setSize: function(e, width, height){
 			var item = e.item;
@@ -3720,11 +3816,11 @@ var design={
 			{
 				printing_setting.confirmColor = true;
 			}
-			
-			jQuery(document).triggerHandler( "confirm_printing.item.design", printing_setting);			
-			
+
+			jQuery(document).triggerHandler( "confirm_printing.item.design", printing_setting);
+
 			if (printing_setting.confirmColor == true)
-			{				
+			{
 				box.html('').css('display', 'none');
 				if(o.item.confirmColor == true)
 				{
@@ -3732,7 +3828,7 @@ var design={
 					{
 						var item = o.item;
 						jQuery('#item-print-colors').html('<div class="col-xs-6 col-md-6"><img class="img-thumbnail img-responsive" src="'+item.thumb+'"></div><div class="col-xs-6 col-md-6"><div id="print-color-added" class="list-colors"></div><br/><span id="print-color-edit">'+lang.text.ink_colors+'</span></div>');
-						
+
 						jQuery('#print-color-edit').click(function(){
 							design.item.setupColorprint(o);
 						});
@@ -3749,23 +3845,23 @@ var design={
 					else{
 						this.setupColorprint(o);
 					}
-				}				
+				}
 			}
 			else
 			{
-				box.html('').css('display', 'none');				
+				box.html('').css('display', 'none');
 			}
 		},
 		imports: function(item){
 			this.unselect();
 			jQuery('.labView.active .design-area').css('overflow', 'visible');
-			var e = $jd('#app-wrap .active .content-inner'),				
+			var e = $jd('#app-wrap .active .content-inner'),
 				span = document.createElement('span');
 			var n = -1;
 			jQuery('#app-wrap .drag-item').each(function(){
 				var index 	= jQuery(this).attr('id').replace('item-', '');
 				if (index > n) n = parseInt(index);
-			});			
+			});
 			var n = n + 1;
 			if (item.type == 'team')
 			{
@@ -3775,19 +3871,19 @@ var design={
 					span.className = 'drag-item drag-item-name';
 			}
 			else
-			{			
+			{
 				span.className = 'drag-item';
 			}
 			span.id 		= 'item-'+n;
 			span.item 		= item;
 			item.id 		= n;
-			jQuery(span).bind('click', function(e){design.item.select(this); e.stopPropagation();});			
+			jQuery(span).bind('click', function(e){design.item.select(this); e.stopPropagation();});
 
 			span.style.left 	= item.left;
 			span.style.top 		= item.top;
 			span.style.width 	= item.width;
 			span.style.height 	= item.height;
-			
+
 			jQuery(span).data('id', item.id);
 			jQuery(span).data('type', item.type);
 			if (typeof item.file != 'undefined')
@@ -3801,10 +3897,10 @@ var design={
 			}
 			jQuery(span).data('width', item.width);
 			jQuery(span).data('height', item.height);
-			
+
 			span.style.zIndex = item.zIndex;
 			design.zIndex = parseInt(item.zIndex);
-			
+
 			jQuery(document).triggerHandler( "before.imports.item.design", [span, item]);
 			if(item.svg.indexOf('svg') == -1) return;
 			jQuery(span).append(item.svg);
@@ -3823,7 +3919,7 @@ var design={
 				jQuery('#clipart-colors').css('display', 'none');
 				jQuery('.btn-action-colors').css('display', 'none');
 			}
-			
+
 			if (item.type != 'team')
 			{
 				var remove = document.createElement('div');
@@ -3833,18 +3929,18 @@ var design={
 				jQuery(span).append(remove);
 			}
 			e.append(span);
-						
+
 			this.move($jd(span));
 			this.resize($jd(span));
 			if (item.type != 'team')
 			if (item.rotate != 0)
-			{				
+			{
 				this.rotate($jd(span), item.rotate * 0.0174532925);
 			}
 			else
 			{
 				this.rotate($jd(span));
-			}			
+			}
 			design.layers.add(item);
 			if (item.type == 'clipart' && typeof item.file != 'undefined' && typeof item.file.type != 'undefined' && item.file.type == 'svg')
 			{
@@ -3865,7 +3961,7 @@ var design={
 						colors[0] = span.item.color;
 					else
 						colors[0] = 'none';
-					
+
 					if (typeof span.item.outlineC != 'undefined')
 						colors[1] = span.item.outlineC;
 				}
@@ -3875,11 +3971,14 @@ var design={
 				}
 			}
 			span.item.colors = colors;
-			
+
 			this.setup(item);
 			jQuery(document).triggerHandler( "after.imports.item.design", [span, item]);
 			design.print.colors();
 			design.print.size();
+			setTimeout(function(){
+				jQuery(document).triggerHandler( "update.design" );
+			}, 2000);
 		},
 		align:{
 			left: function(){
@@ -3903,29 +4002,29 @@ var design={
 		move: function(e){
 			if(!e) e = $jd('.drag-item-selected');
 			e.draggable({
-				scroll: false,				
+				scroll: false,
 				drag:function(event, ui){
 					var e = ui.helper;
-					
+
 					var o = e.parent().parent();
 					var	left = o.css('left');
 						left = parseInt(left.replace('px', ''));
-						
+
 					var	top = o.css('top');
 						top = parseInt(top.replace('px', ''));
 					var	width = o.css('width');
 						width = parseInt(width.replace('px', ''));
-					
+
 					var	height = o.css('height');
 						height = parseInt(height.replace('px', ''));
-												
+
 					var $left = ui.position.left,
 						$top = ui.position.top,
 						$width = e.width(),
 						$height = e.height();
 					if($left < 0 || $top < 0 || ($left+$width) > width || ($top+$height) > height){
 						e.data('block', true);
-						e.css('border', '1px solid #FF0000');						
+						e.css('border', '1px solid #FF0000');
 					}else{
 						e.data('block', false);
 						e.css('border', '1px dashed #444444');
@@ -3935,18 +4034,19 @@ var design={
 				stop: function( event, ui ) {
 					jQuery(document).triggerHandler( "move.item.design", ui);
 					design.ajax.getPrice();
+					jQuery(document).triggerHandler( "update.design" );
 				}
-			});						
+			});
 		},
 		resize: function(e, handles){
 			if(typeof handles == 'undefined') handles = 'se';
-			
+
 			if(handles == 'se') {var auto = true; e = e;}
 			else {var auto = false;}
 			if(!e) e = $jd('.drag-item-selected');
-						
-			var oldwidth = 0, oldsize=0;		
-			e.resizable({minHeight: 10, minWidth: 10,				
+
+			var oldwidth = 0, oldsize=0;
+			e.resizable({minHeight: 10, minWidth: 10,
 				aspectRatio: auto,
 				handles: handles,
 				start: function( event, ui ){
@@ -3957,21 +4057,22 @@ var design={
 					jQuery(document).triggerHandler( "resize.item.design", ui);
 					design.print.size();
 					design.ajax.getPrice();
+					jQuery(document).triggerHandler( "update.design" );
 				},
 				resize: function(event,ui){
 					var e = ui.element;
 					var o = e.parent().parent();
 					var	left = o.css('left');
 						left = parseInt(left.replace('px', ''));
-						
+
 					var	top = o.css('top');
 						top = parseInt(top.replace('px', ''));
 					var	width = o.css('width');
 						width = parseInt(width.replace('px', ''));
-					
+
 					var	height = o.css('height');
 						height = parseInt(height.replace('px', ''));
-																		
+
 					var $left = parseInt(ui.position.left),
 						$top = parseInt(ui.position.top),
 						$width = parseInt(ui.size.width),
@@ -3986,32 +4087,32 @@ var design={
 						e.data('block', false);
 						e.css('border', '1px dashed #444444');
 					}
-					var svg = e.find('svg');									
-					
+					var svg = e.find('svg');
+
 					svg[0].setAttributeNS(null, 'width', $width);
-					svg[0].setAttributeNS(null, 'height', $height);		
-					svg[0].setAttributeNS(null, 'preserveAspectRatio', 'none');					
-					
+					svg[0].setAttributeNS(null, 'height', $height);
+					svg[0].setAttributeNS(null, 'preserveAspectRatio', 'none');
+
 					if(e.data('type') == 'clipart')
 					{
 						var file = e.data('file');
 						if(file.type == 'image')
-						{	
+						{
 							var img = e.find('image');
 							img[0].setAttributeNS(null, 'width', $width);
 							img[0].setAttributeNS(null, 'height', $height);
 						}
 					}
-					
+
 					if(e.data('type') == 'text')
-					{						
+					{
 						//var text = e.find('text');
-						//text[0].setAttributeNS(null, 'y', 20);						
+						//text[0].setAttributeNS(null, 'y', 20);
 					}
-					
+
 					jQuery('#'+e.data('type')+'-width').val(parseInt($width));
 					jQuery('#'+e.data('type')+'-height').val(parseInt($height));
-				}				
+				}
 			});
 		},
 		rotate: function(e, angle){
@@ -4019,11 +4120,11 @@ var design={
 			else deg = angle;
 			if( typeof e != Object ) var o = jQuery(e);
 			else var o = e;
-			o.rotatable({angle: deg, 
+			o.rotatable({angle: deg,
 				rotate: function(event, angle){
 					var deg = Math.round(angle.r);
 					if(deg < 0) deg = 360 + deg;
-					
+
 					jQuery('#' + e.data('type') + '-rotate-value').val(deg);
 					o.data('rotate', deg);
 					jQuery(document).triggerHandler( "rotate.item.design", deg);
@@ -4037,29 +4138,31 @@ var design={
 			jQuery('.labView.active .design-area').css('overflow', 'visible');
 			$jd(e).addClass('drag-item-selected');
 			$jd(e).css('border', '1px dashed #444444');
-			
+
 			if ($jd(e).resizable('option', 'disabled') == true)
 				$jd(e).resizable({ disabled: false, handles: 'e' });
-			
+
 			if ($jd(e).draggable('option', 'disabled') == true)
 				$jd(e).draggable({ disabled: false });
-			
+
 			design.popover('add_item_'+jQuery(e).data('type'));
 			jQuery('.add_item_'+jQuery(e).data('type')).addClass('active');
 			design.menu(jQuery(e).data('type'));
 			this.update(e);
 			this.printColor(e);
-			design.layers.select(jQuery(e).attr('id').replace('item-', ''));
+			if (jQuery(e).length) {
+				design.layers.select(jQuery(e).attr('id').replace('item-', ''));
+			}
 			jQuery(document).triggerHandler( "select.item.design", e);
 		},
 		unselect: function(e){
 			$jd('#app-wrap .drag-item-selected').each(function(){
 				$jd(this).removeClass('drag-item-selected');
-				$jd(this).css('border', 0);	
-				
+				$jd(this).css('border', 0);
+
 				if ($jd(this).resizable('option', 'disabled') == false)
 					$jd(this).resizable({ disabled: true, handles: 'e' });
-				
+
 				if ($jd(this).draggable('option', 'disabled') == false)
 					$jd(this).draggable({ disabled: true });
 			});
@@ -4081,13 +4184,14 @@ var design={
 			design.print.colors();
 			design.print.size();
 			design.ajax.getPrice();
+			jQuery(document).triggerHandler( "update.design" );
 			return;
 		},
 		setup: function(item){
 			if(item.type == 'clipart')
 			{
 				jQuery('.popover-title').children('span').html(lang.text.clipart);
-				
+
 				/* color of clipart */
 				var e = this.get();
 				if(item.upload == 1)
@@ -4096,7 +4200,7 @@ var design={
 				}
 				if (item.change_color == 1)
 				{
-					var colors = design.svg.getColors(e.children('svg'));				
+					var colors = design.svg.getColors(e.children('svg'));
 				}
 				if(typeof colors != 'undefined' && item.change_color == 1)
 				{
@@ -4106,7 +4210,7 @@ var design={
 					div.html('');
 					var c = [];
 					for(var color in colors)
-					{					
+					{
 						if (color == 'none') continue;
 						c.push(color);
 						var a = document.createElement('a');
@@ -4127,24 +4231,24 @@ var design={
 					jQuery('.btn-action-colors').css('display', 'none');
 				}
 			}
-			
+
 			if(item.type == 'text'){
 				jQuery('.popover-title').children('span').html(lang.text.text);
 			}
-			document.getElementById(item.type + '-rotate-value').value = 0;		
-		
+			document.getElementById(item.type + '-rotate-value').value = 0;
+
 			jQuery('.dropdown-color').popover({
-				html:true,				
+				html:true,
 				placement:'bottom',
 				title:lang.text.color+' <a class="close" href="#">&times;</a>',
 				content:function(){
 					jQuery('.dropdown-color').removeClass('active');
 					var html = jQuery('.other-colors').html();
-					jQuery(this).addClass('active');					
+					jQuery(this).addClass('active');
 					return '<div data-color="'+jQuery(this).data('color')+'" class="list-colors">' + html + '</div>';
-				}				
+				}
 			});
-			
+
 			jQuery('.dropdown-color').on('show.bs.popover', function () {
 				var elm = this;
 				jQuery('.dropdown-color').each(function(){
@@ -4154,12 +4258,12 @@ var design={
 					}
 				});
 			});
-			jQuery('.dropdown-color').click(function (e) {				
+			jQuery('.dropdown-color').click(function (e) {
 				e.stopPropagation();
 			});
-			jQuery(document).click(function (e) {				
-				jQuery('.dropdown-color').popover('hide');				
-			});			
+			jQuery(document).click(function (e) {
+				jQuery('.dropdown-color').popover('hide');
+			});
 			jQuery('.dg-tooltip').tooltip();
 			design.popover('add_item_'+item.type);
 		},
@@ -4171,13 +4275,18 @@ var design={
 			var e = this.get();
 			switch(name)
 			{
-				case 'rotate':				
-					e.rotatable("setValue", 0);				
+				case 'rotate':
+					e.rotatable("setValue", 0);
+					jQuery(document).triggerHandler( "update.design" );
+
+					var elem = e[0];
+					design.item.unselect();
+					elem.click();
 					break;
 			}
-		},		
+		},
 		changeColor: function(e){
-			
+
 			var o 		= this.get(),
 				color 	= jQuery(e).data('color'),
 				a 		= jQuery('.dropdown-color.active');
@@ -4190,12 +4299,17 @@ var design={
 				jQuery(a).removeClass('bg-none');
 				jQuery(a).css('background-color', '#'+color);
 			}
-			jQuery(a).data('value', color);			
-				
+			jQuery(a).data('value', color);
+
 			if(o.data('type') == 'clipart'){
-				var a = jQuery('#list-clipart-colors .dropdown-color.active');				
-				design.art.changeColor(a, color);
-				
+				var a = jQuery('#list-clipart-colors .dropdown-color.active');
+				if (a.length < 1) {
+					var el = design.item.get();
+					design.myart.convertcolor.changeColor(el, color);
+				} else {
+					design.art.changeColor(a, color);
+				}
+
 				if (color == 'none')
 					var hex = color;
 				else
@@ -4210,14 +4324,16 @@ var design={
 			}
 			jQuery('.dropdown-color').popover('hide');
 			design.print.colors();
-			design.ajax.getPrice();			
+			design.ajax.getPrice();
 			jQuery(document).triggerHandler( "after.item.changecolor", [o.data('type'), color]);
+			jQuery(document).triggerHandler( "update.design" );
 		},
-		update: function(e){			
+		update: function(e){
+			if (typeof e == 'undefined') return;
 			var o = $jd(e),
 				type = o.data('type'),
 				css = e.style;
-			
+
 			/* rotate */
 			if (typeof css == 'undefined')
 				css = document.getElementById(jQuery(e).attr('id')).style;
@@ -4229,11 +4345,11 @@ var design={
 			{
 				var deg = jQuery(e).data('rotate');
 			}
-			
+
 			/* width and height */
 			$jd('#'+type+'-width').val(design.convert.px(css.width));
 			$jd('#'+type+'-height').val(design.convert.px(css.height));
-			
+
 			switch(type){
 				case 'clipart':
 					design.art.update(e);
@@ -4246,6 +4362,7 @@ var design={
 					break;
 			}
 			$jd('.rotate-value').val(deg);
+			jQuery(document).triggerHandler( "update.design" );
 		},
 		updateSize: function(w, h){
 			var e = design.item.get();
@@ -4254,15 +4371,16 @@ var design={
 				view = svg[0].getAttributeNS(null, 'viewBox'),
 				width = svg[0].getAttributeNS(null, 'width'),
 				height = svg[0].getAttributeNS(null, 'height');
-			view = view.split(' ');				
+			view = view.split(' ');
 			svg[0].setAttributeNS(null, 'width', w);
 			svg[0].setAttributeNS(null, 'height', h);
 			svg[0].setAttributeNS(null, 'viewBox', '0 0 '+ (w * view[2])/width +' '+ ((h * view[3])/height));
-			
+
 			jQuery(document).triggerHandler( "size.update.text.design", [w, h]);
-			
+
 			jQuery(e).css({'width':w+'px', 'height':h+'px'});
 			design.print.size();
+			jQuery(document).triggerHandler( "update.design" );
 		}
 	},
 	layers:{
@@ -4285,6 +4403,7 @@ var design={
 			design.item.unselect();
 		},
 		add: function(item){
+			if (typeof item == 'undefined' || typeof item.type == 'undefined') return;
 			var li 				= document.createElement('li');
 				li.className 	= 'layer layer-'+item.type;
 				li.id 			= 'layer-' + item.id;
@@ -4295,7 +4414,7 @@ var design={
 			{
 				var name = item.text;
 				if (name.length > 10)
-					name = name.substring(0, 10);				
+					name = name.substring(0, 10);
 				var html = '<i class="glyphicons text_bigger glyphicons-12"></i> ';
 				html = html + ' <span title="'+item.text+'">'+name+'</span>';
 			}
@@ -4314,21 +4433,24 @@ var design={
 					name = name.substring(0, 10);
 				if(item.thumb.indexOf('http') === -1)
 					item.thumb = item.path + item.thumb;
+				if (typeof item.imgThumb != 'undefined') {
+					item.thumb = item.imgThumb;
+				}
 				var html = '<img alt="" src="'+item.thumb+'">';
 				html = html + ' <span title="'+item.title+'">'+name+'</span>';
 			}
-			
-			
+
+
 			html = html + '<div class="layer-action pull-right">'
-						+ '<a class="dg-tooltip" data-placement="left" data-toggle="tooltip" href="javascript:void(0)" title="'+lang.text.sort+'">'
+						+ '<a class="dg-tooltip" data-placement="top" data-toggle="tooltip" href="javascript:void(0)" title="'+lang.text.sort+'">'
 						+ '<i class="glyphicons move glyphicons-small"></i>'
 						+ '</a>';
 			if (item.type != 'team')
 			{
-				html = html + '<a class="remove-layer" title="" onclick="design.layers.remove('+item.id+')" data-placement="top" data-toggle="tooltip" href="javascript:void(0)" data-original-title="'+lang.text.layer+'">'
+				html = html + '<a class="remove-layer dg-tooltip" title="" onclick="design.layers.remove('+item.id+')" data-placement="top" data-toggle="tooltip" href="javascript:void(0)" data-original-title="'+lang.text.layer+'">'
 						+ '<i class="glyphicons bin glyphicons-small"></i></a></div>';
 			}
-			
+
 			li.innerHTML = html;
 			jQuery('#layers').prepend(li);
 			design.layers.select(item.id);
@@ -4346,6 +4468,16 @@ var design={
 				design.print.colors();
 				design.print.size();
 				design.ajax.getPrice();
+
+				// remove name & number
+				if (id == 0) {
+					if (jQuery('#team_add_name').is(':checked') == true) {
+						jQuery('#team_add_name').click();
+					}
+					if (jQuery('#team_add_number').is(':checked') == true) {
+						jQuery('#team_add_number').click();
+					}
+				}
 			}
 		},
 		sort: function(){
@@ -4360,25 +4492,26 @@ var design={
 	tabs:{
 		toolbar: function(e){
 			$jd('ul.dg-panel li.panel').hide('slow');
-			$jd('#'+e).show('slow');			
+			$jd('#'+e).show('slow');
 		}
 	},
 	menu: function(type){
-		jQuery('.menu-left a').removeClass('active');		
+		jQuery('.menu-left a').removeClass('active');
 		jQuery('.add_item_' + type ).addClass('active');
 	},
 	popover: function(e){
 		jQuery('.dg-options').css('display', 'none');
 		jQuery('#options-'+e).css('display', 'block');
-		jQuery('.popover').css({'top': '40px', 'display':'block'});	
-		
+		jQuery('.popover').css({'top': '40px', 'display':'block'});
+
 		var elm = jQuery('.menu-left .'+e);
-		
+
 		var index = jQuery('.menu-left li').index(jQuery('.menu-left .'+e).parent());
 		var position = elm.position();
 		if(typeof position != 'undefined')
 		{
-			var top = position.top - 20;
+			var dgtop = jQuery('#dg-left').position().top - 20;
+			var top = position.top + dgtop;
 			jQuery('.popover .arrow').css('top', top + 'px');
 		}
 	},
@@ -4387,13 +4520,13 @@ var design={
 			if(rad.indexOf('rotate') != -1)
 			{
 				var v = rad.replace('rotate(', '');
-					v = v.replace('rad)', '');					
+					v = v.replace('rad)', '');
 			}else{
 				var v = parseFloat(rad);
 			}
-			
+
 			var deg = ( v * 180 ) / Math.PI;
-			
+
 			if (deg < 0) deg = 360 + deg;
 			return Math.round(deg);
 		},
@@ -4413,23 +4546,23 @@ var design={
 				alert_text(lang.upload.terms);
 				return false;
 			}
-			
+
 			if (jQuery('#files-upload').val() == '')
 			{
 				alert_text(lang.upload.chooseFile);
 				return false;
 			}
-			
+
 			return true;
 		}
 	},
 	svg:{
 		iniColors: function(o){
 			var i=0, colors = [], seft = this;
-	
+
 			var tags = ['defs', 'style', 'metadata', 'tspan'];
 			var tags_default = ['path', 'polygon', 'circle', 'ellipse', 'polygon', 'polyline', 'text', 'text'];
-			
+
 			if (jQuery(o).find('style').length > 0)
 			{
 				var is_css = true;
@@ -4444,18 +4577,18 @@ var design={
 			{
 				var is_css = false;
 			}
-			
+
 			jQuery(o).find('*').each(function(){
 				var tag = this.nodeName;
 				if ( tags.indexOf(tag) == -1)
-				{					
+				{
 					var fill_added = false;
 					var fill = jQuery(this).css('fill');
 					if (fill != 'undefined')
 					{
 						var check = true;
 						if (this.style.fill == '' && tags_default.indexOf(tag) == -1)
-						{					
+						{
 							check = is_css;
 							if (is_css == true && typeof css != 'undefined')
 							{
@@ -4471,7 +4604,7 @@ var design={
 										check = false;
 									}
 								}
-								
+
 								var string = jQuery(this).attr('class');
 								if (typeof string == 'undefined')
 								{
@@ -4484,15 +4617,15 @@ var design={
 									for(j=0; j<classs.length; j++)
 									{
 										if ( css.indexOf('.'+classs[j]+'{') != -1 )
-										{									
+										{
 											check_css = true;
 										}
 									}
 									check = check_css;
 								}
 							}
-						}				
-						
+						}
+
 						if (check == true)
 						{
 							var color = parseColor(fill);
@@ -4503,7 +4636,7 @@ var design={
 								hex 		= hex.toUpperCase();
 							var n 		= colors.indexOf(hex);
 							if (n == -1)
-							{					
+							{
 								seft.addClass(this, 'fill', i);
 								colors[i] = hex;
 								i++;
@@ -4513,14 +4646,14 @@ var design={
 								seft.addClass(this, 'fill', n);
 							}
 							fill_added = true;
-						}			
+						}
 					}
-					
+
 					if (fill_added == false)
 					{
 						var fill = jQuery(this).attr('fill');
 						if (typeof fill != 'undefined' && fill != '')
-						{			
+						{
 							var color = parseColor(fill);
 							var hex 	= color.hex;
 							if (hex == 'none' || hex == 'NONE')
@@ -4541,12 +4674,12 @@ var design={
 						}
 					}
 					jQuery(this).removeAttr('fill');
-					
+
 					var stroke_added = false;
-					
+
 					var stroke = jQuery(this).css('stroke');
 					if (typeof stroke != 'undefined' && stroke != 'none' && stroke != 'NONE' && stroke != '')
-					{			
+					{
 						var color = parseColor(stroke);
 						var hex 	= color.hex;
 						if (hex == 'none' || hex == 'NONE')
@@ -4555,7 +4688,7 @@ var design={
 								hex 		= hex.toUpperCase();
 						var n 		= colors.indexOf(hex);
 						if (n == -1)
-						{					
+						{
 							seft.addClass(this, 'stroke', i);
 							colors[i] = hex;
 							i++;
@@ -4565,8 +4698,8 @@ var design={
 							seft.addClass(this, 'stroke', n);
 						}
 						stroke_added = true;
-					}	
-					
+					}
+
 					if (stroke_added == false)
 					{
 						var stroke = jQuery(this).attr('stroke');
@@ -4592,7 +4725,7 @@ var design={
 						}
 					}
 					jQuery(this).removeAttr('stroke');
-					 
+
 					if (jQuery(this).attr('style') != 'undefined')
 					{
 						jQuery(this).css('fill', '');
@@ -4600,16 +4733,16 @@ var design={
 					}
 				}
 			});
-			
+
 			this.addCss(o, colors);
-			this.addFill(o, colors);			
+			this.addFill(o, colors);
 			return colors;
 		},
 		addClass: function(o, txt, index){
 			var id = jQuery(o).parents('.drag-item').attr('id');
 			if (typeof id != 'undefined')
 				txt = id +'-'+ txt;
-			
+
 			var str = jQuery(o).attr('class');
 			if (typeof str != 'undefined')
 			{
@@ -4626,16 +4759,16 @@ var design={
 				var txt = id +'-';
 			else
 				var txt = '';
-			
+
 			var style = jQuery(o).find('style'), newCss = '';
-	
+
 			jQuery.each(colors, function(i, color){
 				newCss = newCss + '.'+txt+'fill'+i + '{fill:'+color+';}';
 				newCss = newCss + '.'+txt+'stroke'+i + '{stroke:'+color+';}';
 			});
-			
+
 			if (typeof style[0] != 'undefined')
-			{				
+			{
 				var css = '';
 				style[0].textContent = css + newCss;
 			}
@@ -4644,7 +4777,7 @@ var design={
 				var svgNS 	= "http://www.w3.org/2000/svg",
 					style 		= document.createElementNS(svgNS, 'style');
 					style.setAttributeNS(null, 'type', 'text/css');
-					
+
 				var content 	= document.createTextNode(newCss);
 					style.appendChild(content);
 				o.appendChild(style);
@@ -4656,44 +4789,44 @@ var design={
 				var txt = id+'-';
 			else
 				var txt = '';
-	
+
 			jQuery.each(colors, function(i, color){
 				jQuery(o).parents('.drag-item').find('.'+txt+'fill'+i).each(function(){
 					this.setAttribute('fill', color);
 				});
 				jQuery(o).parents('.drag-item').find('.'+txt+'stroke'+i).each(function(){
 					this.setAttribute('stroke', color);
-				});				
-			});			
+				});
+			});
 		},
 		changeColor: function(e, index, color){
 			var colors = e.item.colors;
-			if (typeof colors == 'undefined') return false;		
+			if (typeof colors == 'undefined') return false;
 			if (typeof colors[index] == 'undefined') return false;
-				
+
 			e.item.colors = colors;
-			
+
 			var id = jQuery(e).attr('id');
 			if (typeof id != 'undefined')
 				var txt = id +'-';
 			else
 				var txt = '';
-			
+
 			jQuery(e).find('.'+txt+'fill'+index).attr('fill', color);
 			jQuery(e).find('.'+txt+'stroke'+index).attr('stroke', color);
-			
+
 			var style = jQuery(e).find('style');
-			
+
 			if (typeof style[0] != 'undefined')
 			{
 				var css = jQuery('<div>').append(jQuery(style[0]).clone()).text();
-				
+
 				var oldCss = '.'+txt+'fill'+index + '{fill:'+colors[index]+';}';
 					oldCss = oldCss + '.'+txt+'stroke'+index + '{stroke:'+colors[index]+';}';
-				
+
 				var newCss = '.'+txt+'fill'+index + '{fill:'+color+';}';
 				newCss = newCss + '.'+txt+'stroke'+index + '{stroke:'+color+';}';
-				
+
 				if (css.indexOf(oldCss) == -1)
 				{
 					css = css + newCss;
@@ -4702,7 +4835,7 @@ var design={
 				{
 					css = css.replace(oldCss, newCss);
 				}
-				
+
 				style[0].textContent = css;
 			}
 			colors[index] = color;
@@ -4777,6 +4910,11 @@ var design={
 				return true;
 			}
 			var area 	= eval ("(" + items['area'][postion] + ")");
+			if (area == undefined) {
+				design.mask(false);
+				return false;
+			}
+
 			var idActi  = jQuery('.labView.active').attr('id');
 			jQuery('.labView').removeClass('active');
 			jQuery('#view-' + postion).addClass('active');
@@ -4790,17 +4928,17 @@ var design={
 				obj[i].width 	= design.convert.px(jQuery(this).css('width'));
 				obj[i].height 	= design.convert.px(jQuery(this).css('height'));
 				obj[i].id    	= jQuery(this).attr('id');
-				
+
 				obj[i].type 	= jQuery(this).data('type');
-				
+
 				jQuery(document).triggerHandler( "item.canvas.design", [obj[i], this]);
-								
+
 				if(typeof jQuery(this).data('rotate') != 'undefined')
 					obj[i].rotate = jQuery(this).data('rotate');
-				else 
+				else
 					obj[i].rotate = 0;
-					
-				var svg 		= jQuery(this).find('svg');				
+
+				var svg 		= jQuery(this).find('svg');
 				obj[i].svg 		= jQuery('<div></div>').html(jQuery(svg).clone()).html();
 				var image 		= jQuery(svg).find('image');
 				if (typeof image[0] == 'undefined')
@@ -4812,7 +4950,7 @@ var design={
 					obj[i].img 		= true;
 					obj[i].flipX    = jQuery(this).data('flipX');
 					var src 		= jQuery(image).attr('xlink:href');
-					obj[i].src 		= src;				
+					obj[i].src 		= src;
 				}
 				obj[i].zIndex	= this.style.zIndex;
 				i++;
@@ -4859,21 +4997,21 @@ var design={
 				tmpRect.area_h = area.height;
 			});
 			jQuery('#view-' + idActi).addClass('active');
-			obj.sort(function(obj1, obj2) {	
+			obj.sort(function(obj1, obj2) {
 				return obj1.zIndex - obj2.zIndex;
 			});
-			
+
 			var canvas 			= document.createElement('canvas');
 				canvas.width 	= area.width;
 				canvas.height 	= area.height;
 			var context = canvas.getContext('2d');
-			
+
 			var count = Object.keys(obj).length;
-			
+
 			if (area.radius == '50%')
 			{
-				var areaHight = parseInt(area.height);				
-				var radius = areaHight / 2;				
+				var areaHight = parseInt(area.height);
+				var radius = areaHight / 2;
 			}
 			else
 			{
@@ -4894,19 +5032,19 @@ var design={
 						item.svg = item.svg.replace(' NS1:xmlns:xlink="http://www.w3.org/1999/xlink"', '');
 						if (item.svg.split(' xmlns="').length > 2)
 							item.svg = item.svg.replace(' xmlns="http://www.w3.org/2000/svg"', '');
-					}				
+					}
 					if (radius > 0)
 					{
 						context.save();
-						var x = 0, 
+						var x = 0,
 							y = 0;
 						var w = area.width;
 						var h = area.height;
 						var r = x + w;
 						var b = y + h;
 						context.beginPath();
-						
-						if (area.radius == '50%') 
+
+						if (area.radius == '50%')
 						{
 							if (w == h)
 							{
@@ -4925,17 +5063,17 @@ var design={
 							context.lineTo(r-radius, y);
 							context.quadraticCurveTo(r, y, r, y+radius);
 							context.lineTo(r, y+h-radius);
-							context.quadraticCurveTo(r, b, r-radius, b);				
+							context.quadraticCurveTo(r, b, r-radius, b);
 							context.lineTo(x+radius, b);
-							context.quadraticCurveTo(x, b, x, b-radius);				
+							context.quadraticCurveTo(x, b, x, b-radius);
 							context.lineTo(x, y+radius);
 							context.quadraticCurveTo(x, y, x+radius, y);
 						}
-						
-						
+
+
 						context.closePath();
-						context.clip();						
-					}						
+						context.clip();
+					}
 					if (item.rotate != 0)
 					{
 						context.save();
@@ -4945,7 +5083,7 @@ var design={
 						item.left = (item.width/2) * -1;
 						item.top = (item.height/2) * -1;
 					}
-					try {						
+					try {
 						if (item.img == true)
 						{
 							/*
@@ -4961,7 +5099,7 @@ var design={
 								flipFlg = '1';
 							}
 							images.onload = function() {
-								context.drawImage(images, item.left, item.top, item.width, item.height);								
+								context.drawImage(images, item.left, item.top, item.width, item.height);
 								context.restore();
 								if(flipFlg == '1')
 								{
@@ -5003,7 +5141,23 @@ var design={
 						}
 						else
 						{
-							var mySrc = 'data:image/svg+xml,'+encodeURIComponent(item.svg);
+							var temp_svg = jQuery(item.svg);
+							var is_text = 0;
+							temp_svg.find('tspan').each(function(){
+								var text_temp = jQuery(this).html();
+								text_temp = text_temp.replace(/&nbsp;/g, '');
+								text_temp = text_temp.replace(/&amp;/g, '&');
+								jQuery(this).text(text_temp);
+								is_text = 1;
+							});
+							if(is_text == 1)
+							{
+								var temp_div = document.createElement('div');
+								jQuery(temp_div).append(temp_svg);
+								item.svg = jQuery(temp_div).html();
+							}
+							//var mySrc = 'data:image/svg+xml;base64,'+encrypt_api.Base64.encode(item.svg);
+							var mySrc = 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(item.svg);
 							var images 	= new Image();
 							images.onload = function() {
 								context.drawImage(images, item.left, item.top);
@@ -5012,15 +5166,15 @@ var design={
 							};
 							images.src = mySrc;
 						}
-						
+
 					}
-					catch (e) 
+					catch (e)
 					{
 						if (e.name == "NS_ERROR_NOT_AVAILABLE") {}
-					}					
+					}
 				}
 				else
-				{		
+				{
 					if(tmpRect.top < 0) tmpRect.top = 0;
 					if(tmpRect.left < 0) tmpRect.left = 0;
 					tmpRect.width  = tmpRect.rght - tmpRect.left;
@@ -5030,7 +5184,7 @@ var design={
 				}
 			}
 			return canvas;
-		},		
+		},
 		canvas: function(postion, canvas1, callback){
 			var area 	= eval ("(" + items['area'][postion] + ")");
 			var color_active = jQuery('#product-list-colors span.active');
@@ -5042,15 +5196,15 @@ var design={
 				is_color_picker = 1;
 			}
 			var hex_color = design.exports.productColor();
-			
+
 			var canvas 			= document.createElement('canvas');
 				canvas.width 	= max_box_width;
 				canvas.height 	= max_box_height;
 			var context = canvas.getContext('2d');
-						
+
 			design.output[postion] = canvas;
-			
-			var layers 	= eval ("(" + items["design"][index][postion] + ")");			
+
+			var layers 	= eval ("(" + items["design"][index][postion] + ")");
 			var count = Object.keys(layers).length;
 				count = parseInt(count) - 1;
 			var z = layers[1].zIndex;
@@ -5069,9 +5223,11 @@ var design={
 
 					var layer = obj[i];
 					i++;
-					
+
 					if (layer.id != 'area-design')
 					{
+						jQuery(document).triggerHandler( "productimg.canvas.design", [postion, layer]);
+
 						var imageObj = new Image();
 						var left 	= design.convert.px(layer.left);
 						var top 	= design.convert.px(layer.top);
@@ -5129,7 +5285,7 @@ var design={
 						else
 						{
 							imageObj.src = siteURL+thumb;
-						}							
+						}
 					}
 					else
 					{
@@ -5178,7 +5334,7 @@ var design={
 											tmpRect.height = tmpRect.area_h;
 										}
 										can.width  = tmpRect.width;
-										can.height = tmpRect.height;					
+										can.height = tmpRect.height;
 										ctx1.drawImage(new_img, tmpRect.left, tmpRect.top, tmpRect.width, tmpRect.height, 0, 0, tmpRect.width, tmpRect.height);
 										design.output[postion + 'nobg'] = can;
 									}
@@ -5212,7 +5368,7 @@ var design={
 									tmpRect.height = tmpRect.area_h;
 								}
 								can.width  = tmpRect.width;
-								can.height = tmpRect.height;					
+								can.height = tmpRect.height;
 								ctx1.drawImage(canvas1, tmpRect.left, tmpRect.top, tmpRect.width, tmpRect.height, 0, 0, tmpRect.width, tmpRect.height);
 								design.output[postion + 'nobg'] = can;
 							}
@@ -5225,12 +5381,12 @@ var design={
 					jQuery(document).triggerHandler( "end.canvas.design", postion);
 					if (typeof callback === "function") {
 						callback(postion);
-					}					
+					}
 				}
 			}
 		}
 	},
-	saveDesign: function(){		
+	saveDesign: function(){
 		if (design.view != 'done')
 		{
 			if (jQuery('#view-'+design.view+' .product-design').html() != '')
@@ -5296,7 +5452,7 @@ var design={
 		}
 		var data = design.ajax.form();
 		data.images = {};
-		
+
 		if (jQuery('#view-front .product-design').html() != '')
 		{
 			if(design.isIE())
@@ -5312,7 +5468,7 @@ var design={
 		{
 			data.images.front = '';
 		}
-		
+
 		if (jQuery('#view-back .product-design').html() != '')
 		{
 			if(design.isIE())
@@ -5328,7 +5484,7 @@ var design={
 		{
 			data.images.back = '';
 		}
-		
+
 		if (jQuery('#view-left .product-design').html() != '')
 		{
 			if(design.isIE())
@@ -5344,7 +5500,7 @@ var design={
 		{
 			data.images.left = '';
 		}
-		
+
 		if (jQuery('#view-right .product-design').html() != '')
 		{
 			if(design.isIE())
@@ -5360,12 +5516,12 @@ var design={
 		{
 			data.images.right = '';
 		}
-		
+
 		var vectors	= JSON.stringify(design.exports.vector());
 		var teams = JSON.stringify(design.teams);
 		var productColor = design.exports.productColor();
-		
-		var thumb = '';	
+
+		var thumb = '';
 		if (data.images.front != '')
 		{
 			thumb = data.images.front;
@@ -5393,13 +5549,13 @@ var design={
 		data.design_file	= design.design_file;
 		data.designer_id	= design.designer_id;
 		data.design_key		= design.design_key;
-		data.product_color	= productColor;	
+		data.product_color	= productColor;
 		data.isIE			= design.isIE();
-		data.title			= jQuery('#design-save-title').val();		
-		data.description	= jQuery('#design-save-description').val();		
-		
+		data.title			= jQuery('#design-save-title').val();
+		data.description	= jQuery('#design-save-description').val();
+
 		jQuery(document).triggerHandler( "before.save.design", data);
-		
+
 		jQuery.ajax({
 			url: siteURL + "ajax.php?type=saveDesign",
 			type: "POST",
@@ -5407,7 +5563,7 @@ var design={
 			data: JSON.stringify(data),
 		}).done(function( msg ) {
 			var results = eval ("(" + msg + ")");
-			
+
 			if (results.error == 1)
 			{
 				alert_text(results.msg);
@@ -5420,7 +5576,7 @@ var design={
 				design.design_key = results.content.design_key;
 				design.productColor = productColor;
 				design.product_id = product_id;
-				
+
 				results.content.productColor	= productColor;
 				results.content.product_id		= product_id;
 				var a = jQuery('#product-thumbs a');
@@ -5428,27 +5584,27 @@ var design={
 				jQuery(document).triggerHandler( "done.save.design", results.content);
 				if(typeof product_url == 'undefined')
 				{
-					var linkEdit 	= siteURL + 'sharing.php/'+results.content.user_id+':'+results.content.design_key+':'+product_id+':'+productColor+':'+parent_id;	
+					var linkEdit 	= siteURL + 'sharing.php/'+results.content.user_id+':'+results.content.design_key+':'+product_id+':'+productColor+':'+parent_id;
 				}
 				else
 				{
-					var linkEdit 	= product_url + results.content.user_id+':'+results.content.design_key+':'+product_id+':'+productColor+':'+parent_id;			
+					var linkEdit 	= product_url + results.content.user_id+':'+results.content.design_key+':'+product_id+':'+productColor+':'+parent_id;
 				}
 				jQuery('#link-design-saved').val(linkEdit);
-				jQuery('#dg-share').modal();					
+				jQuery('#dg-share').modal();
 			}
-			
+
 			jQuery('#dg-mask').css('display', 'none');
 			jQuery('#dg-designer').css('opacity', '1');
-		});		
+		});
 	},
 	save: function(check){
 		if (design.ajax.isBlank() == false) return false;
-		
+
 		if (user_id == 0)
 		{
 			is_save = 1;
-			jQuery('#f-login').modal();			
+			jQuery('#f-login').modal();
 		}
 		else
 		{
@@ -5464,7 +5620,7 @@ var design={
 			{
 				design.tools.zoom();
 			}
-			
+			jQuery(document).triggerHandler( "start.save.design");
 			if (user_id == design.designer_id)
 			{
 				if(typeof admin_design_idea != 'undefined' && admin_design_idea == 1 && design.design_id != 0)
@@ -5473,7 +5629,7 @@ var design={
 					design.svg.items(view, design.saveDesign);
 					return false;
 				}
-			
+
 				if (typeof check != 'undefined' && check == 1)
 				{
 					jQuery('#save-design-info').modal('hide');
@@ -5483,9 +5639,9 @@ var design={
 					jQuery('#save-design-info').modal('show');
 					return false;
 				}
-				
+
 				jQuery( "#save-confirm" ).dialog({
-					resizable: false,			  
+					resizable: false,
 					height: 200,
 					width: 350,
 					closeText: 'X',
@@ -5498,13 +5654,13 @@ var design={
 							},
 							click: function() {
 								jQuery( this ).dialog( "close" );
-								design.design_id = 0;								
+								design.design_id = 0;
 								design.design_key = '';
 								design.design_file = '';
-								
+
 								jQuery('#dg-mask').css('display', 'block');
 								jQuery('#dg-designer').css('opacity', '0.3');
-								design.svg.items(view, design.saveDesign);							
+								design.svg.items(view, design.saveDesign);
 							}
 						},
 						{
@@ -5517,7 +5673,7 @@ var design={
 								jQuery('#dg-mask').css('display', 'block');
 								jQuery('#dg-designer').css('opacity', '0.3');
 								design.svg.items(view, design.saveDesign);
-								
+
 							}
 						}
 					]
@@ -5547,18 +5703,18 @@ var design={
 			alert_text(lang.text.email);
 			return false;
 		}
-		
+
 		if (password == '')
 		{
 			alert_text(lang.text.designid);
 			return false;
 		}
-		
-		
+
+
 		var $btn = jQuery(e).button('loading');
 		jQuery.ajax({
 			url: siteURL + "ajax.php?type=user",
-			type: "POST",			
+			type: "POST",
 			data: {email: email, password:password}
 		}).done(function( msg ) {
 			user_id = msg;
@@ -5618,11 +5774,11 @@ var design={
 			var postions = ['front', 'back', 'left', 'right'];
 			jQuery.each(postions, function(i, postion){
 				if (jQuery('#view-'+postion +' .product-design').html().length > 10)
-				{					
+				{
 					vectors[postion]	= design.exports.items('view-'+postion);
 				}
 			});
-			
+
 			return vectors;
 		},
 		items: function(postion){
@@ -5655,7 +5811,7 @@ var design={
 						var removeArr = [];
 						for(j = 0; j < attLst.length; j++) {
 							var attr = attLst[j];
-							if(attr.name.toLowerCase().indexOf('inkscape:') != -1 
+							if(attr.name.toLowerCase().indexOf('inkscape:') != -1
 								|| attr.name.toLowerCase().indexOf('xmlns:ns') != -1
 								|| attr.name.toLowerCase().indexOf('ns1:') != -1
 								|| attr.name.toLowerCase().indexOf('ns2:') != -1
@@ -5701,7 +5857,7 @@ var design={
 					item.rotate	= jQuery(this).data('rotate');
 				else
 					item.rotate	= 0;
-									
+
 				if (item.type == 'text' || item.type == 'team')
 				{
 					item.text					= this.item.text;
@@ -5712,10 +5868,10 @@ var design={
 					item.outlineW				= this.item.outlineW;
 					if (typeof this.item.weight != 'undefined')
 						item.weight 			= this.item.weight;
-					
+
 					if (typeof this.item.Istyle != 'undefined')
 						item.Istyle 			= this.item.Istyle;
-						
+
 					if (typeof this.item.decoration != 'undefined')
 						item.decoration 		= this.item.decoration;
 				}
@@ -5726,20 +5882,20 @@ var design={
 					item.file_name		= this.item.file_name;
 					item.file			= this.item.file;
 					item.thumb			= this.item.thumb;
-					item.url			= this.item.url;							
-					
+					item.url			= this.item.url;
+
 					if (typeof this.item.colors != 'undefined')
 						item.colors			= this.item.colors;
-					
+
 					if (typeof this.item.confirmColor != 'undefined')
 						item.confirmColor	= this.item.confirmColor;
 					else
 						item.confirmColor = 0;
-					
+
 					if(typeof this.item.clipart_id != 'undefined'){item.clipart_id = this.item.clipart_id;}
 				}
 				jQuery(document).triggerHandler( "exports.item.design", [item, this]);
-				
+
 				vectors[i] = item;
 				i++;
 			});
@@ -5749,12 +5905,16 @@ var design={
 	imports:{
 		vector: function(str){
 			if (str == '') return false;
-			
+
 			var postions = {front:0, back:1, left:2, right:3};
 			var a 		 = document.getElementById('product-thumbs').getElementsByTagName('a');
 			if(typeof str == 'string')
 			{
 				str = str.replace('{ front":{', '{"front":{');
+				var count = (str.match(/"back":/g) || []).length;
+				if (count > 1) {
+					str = str.replace(',"back":{}', '');
+				}
 				try{
 					var vectors = eval('('+str+')');
 				}
@@ -5778,9 +5938,9 @@ var design={
 					items.sort(function(obj1, obj2) {
 						return obj1.zIndex - obj2.zIndex;
 					});
-					design.products.changeView( a[postions[postion]], postion );			
+					design.products.changeView( a[postions[postion]], postion );
 					jQuery.each(items, function(i, item){
-						design.item.imports(item);						
+						design.item.imports(item);
 					});
 				}
 			});
@@ -5825,10 +5985,10 @@ var design={
 		loadDesign: function(key, user_id){
 			design.mask(true);
 			var self = this;
-			
+
 			jQuery.ajax({
 				dataType: "json",
-				url: siteURL + "ajax.php?type=loadDesign&user_id="+user_id+"&design_id="+key		
+				url: siteURL + "ajax.php?type=loadDesign&user_id="+user_id+"&design_id="+key
 			}).done(function( data ) {
 				if (data.error == 1)
 				{
@@ -5856,9 +6016,9 @@ var design={
 						design.teams = eval ("(" + data.design.teams + ")");
 						design.team.load(design.teams);
 					}
-					
+
 					jQuery(document).triggerHandler( "after.load.design", data);
-					
+
 					design.ajax.getPrice();
 				}
 			}).always(function(){
@@ -5869,23 +6029,16 @@ var design={
 	share:{
 		ini: function(type)
 		{
-			if (user_id == 0)
-			{
-				is_save = 1;
-				jQuery('#f-login').modal();			
-			}
-			else
-			{
-				jQuery(document).on('before.save.design', function(event, data){
-					data.is_share = 1;
-				});
-				design.mask(true);
-				jQuery(document).triggerHandler( "start.save.design");
-				design.svg.items('front', design.saveDesign);
-			}
-		},		
+			jQuery(document).on('before.save.design', function(event, datas){
+				datas.is_share = 1;
+				return datas;
+			});
+			design.mask(true);
+			jQuery(document).triggerHandler( "start.save.design");
+			design.svg.items('front', design.saveDesign);
+		},
 		facebook: function(){
-			var link = jQuery('#link-design-saved').val();			
+			var link = jQuery('#link-design-saved').val();
 			link = 'https://www.facebook.com/sharer/sharer.php?u='+encodeURI(link);
 			window.open(link, "_blank", "toolbar=yes, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
 		},
@@ -5900,7 +6053,7 @@ var design={
 		pinterest: function(){
 			var link = jQuery('#link-design-saved').val();
 			if (link != '')
-			{				
+			{
 				link = 'https://pinterest.com/pin/create/button/?url='+link+'&media='+siteURL + design.design_file +'&description='+lang.share.title;
 			}
 			window.open(link, "_blank", "toolbar=yes, scrollbars=yes, resizable=yes, top=500, left=500, width=400, height=400");
@@ -5917,12 +6070,27 @@ var design={
 	}
 }
 
+var is_click_event = 0;
+jQuery(document).on('resize.item.design, rotate.item.design', function(){
+	is_click_event = 0;
+});
 $jd(document).ready(function(){
 	design.ini();
-	
+
+	$jd(document).mousedown(function(event) {
+		is_click_event = 1;
+	});
+
 	$jd('#design-area').click(function(e){
 		e.preventDefault();
 		if(jQuery('.wapper-item-crop').length > 0)
+		{
+			return;
+		}
+
+		var d = new Date();
+		time_key_end = d.getTime();
+		if(jQuery('.drag-item-selected').length > 0 && is_click_event == 0)
 		{
 			return;
 		}
@@ -5931,7 +6099,7 @@ $jd(document).ready(function(){
 		var leftCurso=!document.all ? e.clientX: event.clientX;
 		var mouseDownAt = document.elementFromPoint(leftCurso,topCurso);
 		if( mouseDownAt.parentNode.className == 'product-design'
-			|| mouseDownAt.parentNode.className == 'div-design-area'			
+			|| mouseDownAt.parentNode.className == 'div-design-area'
 			|| mouseDownAt.parentNode.className == 'labView active'
 			|| mouseDownAt.parentNode.className == 'content-inner' )
 		{
@@ -5944,15 +6112,15 @@ $jd(document).ready(function(){
 			{
 				design.item.unselect();
 			}
-			
+
 			$jd('.drag-item').click(function(){design.item.select(this)});
 		}
-		else if(jQuery('.mask-image-bg').length > 0)
+		else if(jQuery('.mask-image-bg').length > 0 || mouseDownAt.parentNode.parentNode.id == 'dg-help-functions' || mouseDownAt.parentNode.parentNode.parentNode.id == 'dg-help-functions')
 		{
 			return;
 		}
 		else if(
-			(mouseDownAt.parentNode.nodeName.toLowerCase() == 'div' && typeof mouseDownAt.parentNode.className == 'string') && 
+			(mouseDownAt.parentNode.nodeName.toLowerCase() == 'div' && typeof mouseDownAt.parentNode.className == 'string') &&
 			(mouseDownAt.parentNode.className.indexOf('mask-item ') != -1 || mouseDownAt.parentNode.className.indexOf('wapper-item-crop') != -1 || mouseDownAt.parentNode.className.indexOf('mask-image ')) != -1)
 		{
 			return;
@@ -5971,7 +6139,7 @@ $jd(document).ready(function(){
 				var cx = offset.left + e.width()/2;
 				var cy = offset.top + e.height()/2;
 				var nl = (left - cx) * Math.cos(rotate) - (top - cy) * Math.sin(rotate) + cx;
-				var nt = (left - cx) * Math.sin(rotate) + (top - cy) * Math.cos(rotate) + cy;		
+				var nt = (left - cx) * Math.sin(rotate) + (top - cy) * Math.cos(rotate) + cy;
 				if (offset.left < nl && (offset.left + e.width())> nl && offset.top < nt && (offset.top + e.height()) > nt)
 				{
 					var zIndex = parseInt(e.css('z-index'));
@@ -6004,7 +6172,7 @@ function confirm_text(msg){
 	return check;
 }
 
-function b64EncodeUnicode(str) {	
+function b64EncodeUnicode(str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
         return String.fromCharCode('0x' + p1);
     }));
@@ -6033,13 +6201,13 @@ function getCookie(cname) {
 
 function parseColor(color) {
 	var arr = [];
-	
+
 	if (color == 'none')
 	{
 		arr.hex = 'none';
 		return arr;
 	}
-	
+
 	var Obj = new RGBColor(color);
 	if (Obj.ok)
 	{
@@ -6210,7 +6378,7 @@ jQuery(function() {
         var e = jQuery(this).attr("data");
         var t = jQuery("#dg-" + e).css("display");
         if (e == "right") {
-            if (t == "none") {                
+            if (t == "none") {
                 jQuery("#dg-right").show();
                 jQuery(this).addClass('active').css({
                     left: "-28px",
@@ -6221,7 +6389,7 @@ jQuery(function() {
 					'top': '60px'
 				});
                 jQuery(".accordion").accordion("refresh")
-            } else {              
+            } else {
                 jQuery("#dg-right").hide();
                 jQuery(this).removeClass('active').css({
                     left: "auto",
@@ -6284,4 +6452,8 @@ function gridArt(elem)
 		var e = jQuery(elem);
 		e.isotope( 'reloadItems' ).isotope();
 	});
+
+	if (e.html() != '' && e.height() == 0) {
+		e.css('height', 'auto');
+	}
 }

@@ -51,21 +51,23 @@ if($is_store == true)
 ?>
 	<hr>
 	<div class="col-sm-12">
-		<h4>Setup Design</h4>
-		<p>Please choose categories and design type of design template will show in this product. Default is show all</p>
+		<h4>Setup Use Store</h4>
+		<p><small>Please choose categories and design type of design idea will show in this product. Default is show all</small></p>
 	</div>
 
 	<div class="form-group">
-		<label class="col-sm-3 control-label">Choose List Categories</label>
+		<label class="col-sm-3 control-label">
+			Choose List Categories
+		</label>
 		
 		<div class="col-sm-8">
-			<select class="form-control select2-options" multiple size="10" name="product[store][categories][]">
-				<?php if(count($categories)) { ?>
+			<select class="form-control" multiple size="10" name="product[store][categories][]">
+				<?php if(try_to_count($categories)) { ?>
 					
 					<?php foreach($categories as $cate) { ?>
-					<option <?php if(in_array($cate['id'], $store_data->categories) ) echo 'selected="selected"'; ?> value="<?php echo $cate['id']; ?>"><?php echo $cate['title']; ?></option>
+					<option <?php if( $check_all == true || in_array($cate['id'], $store_data->categories) ) echo 'selected="selected"'; ?> value="<?php echo $cate['id']; ?>"><?php echo $cate['title']; ?></option>
 					
-						<?php if( isset($cate['children']) && count($cate['children']) >0 ) { ?>
+						<?php if( isset($cate['children']) && try_to_count($cate['children']) >0 ) { ?>
 						
 							<?php foreach($cate['children'] as $child) { ?>
 							<option <?php if( $check_all == true || in_array($child['id'], $store_data->categories) ) echo 'selected="selected"'; ?> value="<?php echo $child['id']; ?>"> &nbsp;&nbsp;&nbsp;- <?php echo $child['title']; ?></option>
@@ -81,14 +83,16 @@ if($is_store == true)
 	</div>
 
 	<div class="form-group">
-		<label class="col-sm-3 control-label">Choose List Design Type</label>
+		<label class="col-sm-3 control-label">
+			Choose List Design Type
+		</label>
 		
 		<div class="col-sm-8">
-			<select class="form-control select2-options" multiple size="10" name="product[store][types][]">
-			<?php if(count($types)) { ?>
+			<select class="form-control" multiple size="10" name="product[store][types][]">
+			<?php if(try_to_count($types)) { ?>
 				
 				<?php foreach($types as $type) { ?>
-					<option <?php if( in_array($type['id'], $store_data->types) ) echo 'selected="selected"'; ?> value="<?php echo $type['id']; ?>"><?php echo $type['title']; ?></option>
+					<option <?php if( $check_all == true || in_array($type['id'], $store_data->types) ) echo 'selected="selected"'; ?> value="<?php echo $type['id']; ?>"><?php echo $type['title']; ?></option>
 				<?php } ?>
 				
 			<?php } ?>

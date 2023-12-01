@@ -61,7 +61,7 @@ class Product extends Controllers
 				$perpage = 10; 
 				
 			if($perpage == 'all')
-				$perpage = count($products);
+				$perpage = try_to_count($products);
 
 			$j = 1;
 			$n = $perpage + $segment;
@@ -78,13 +78,13 @@ class Product extends Controllers
 				$j++;
 			}
 			
-			if($perpage < count($products))
+			if($perpage < try_to_count($products))
 				$data['page'] = $perpage;
 			else
 				$data['page'] = 0;
 
 			$data['products'] 		= $page;
-			$data['total'] 			= count($products);
+			$data['total'] 			= try_to_count($products);
 			$data['segment'] 		= $segment;
 			
 			$this->modal('product', $data);
@@ -105,7 +105,7 @@ class Product extends Controllers
 
 		$dgClass 			= new dg();	
 		$products 			= $dgClass->getProducts();
-		if (count($products) > 0)
+		if (try_to_count($products) > 0)
 		{
 			foreach($products as $row)
 			{
@@ -130,9 +130,9 @@ class Product extends Controllers
 					foreach ($childs[$parent_id] as $key => $row)
 					{
 						$child[] 	= array(
-							'id' 	=> $row['id'],
-							'name' 	=> $row['name'],
-							'image' => $row['image'],
+							'id' 		=> $row['id'],
+							'title' 	=> $row['title'],
+							'image' 	=> $row['image'],
 						);
 					}
 				}
@@ -152,7 +152,7 @@ class Product extends Controllers
 
 		$dgClass 			= new dg();	
 		$products 			= $dgClass->getProducts();
-		if (count($products) > 0)
+		if (try_to_count($products) > 0)
 		{
 			foreach($products as $row)
 			{
@@ -237,7 +237,7 @@ class Product extends Controllers
 		$index = 0;
 		if($id == 0)
 		{
-			if(count($products[$parent_id]) > 0)
+			if(try_to_count($products[$parent_id]) > 0)
 			{
 				foreach($products[$parent_id] as $key => $product)
 				{
@@ -297,7 +297,7 @@ class Product extends Controllers
 		{
 			$dgClass 			= new dg();	
 			$products 			= $dgClass->getProducts();		
-			if (count($products) > 0)
+			if (try_to_count($products) > 0)
 			{
 				foreach($products as $row)
 				{
@@ -362,7 +362,7 @@ class Product extends Controllers
 		{
 			$dgClass 			= new dg();	
 			$products 			= $dgClass->getProducts();		
-			if (count($products) > 0)
+			if (try_to_count($products) > 0)
 			{
 				foreach($products as $row)
 				{
@@ -443,7 +443,18 @@ class Product extends Controllers
 	public function quick_design()
 	{
 		$data = array();
-		$data['position'] = $_GET['position'];
+		if(isset($_GET['position']))
+		{
+			$data['position'] = $_GET['position'];
+		}
+		elseif( isset($_POST['position']) )
+		{
+			$data['position'] = $_POST['position'];
+		}
+		else
+		{
+			$data['position'] = 'front';
+		}
 		
 		$this->modal('quick_design', $data);
 	}
@@ -454,9 +465,15 @@ class Product extends Controllers
 			$dgClass->redirect('index.php/product/edit');
 		
 		$data = $_POST['product'];
+
+		if(isset($data['description']))
+			$data['description'] = $this->strip_shortcodes($data['description']);
+		
+		if(isset($data['short_description']))
+			$data['short_description'] = $this->strip_shortcodes($data['short_description']);
 		
 		$attributes = array();
-		if (isset($data['fields']) && count($data['fields']) > 0)
+		if (isset($data['fields']) && try_to_count($data['fields']) > 0)
 		{
 			$attributes['name'] 		= array();
 			$attributes['prices'] 		= array();
@@ -503,7 +520,7 @@ class Product extends Controllers
 		{
 			$id 				= 1;
 			$products 			= $dgClass->getProducts();		
-			if (count($products) > 0)
+			if (try_to_count($products) > 0)
 			{
 				foreach($products as $product)
 				{
@@ -522,7 +539,7 @@ class Product extends Controllers
 			$products 			= $dgClass->getProducts();
 			
 			$is_new 			= true;
-			if (count($products) > 0)
+			if (try_to_count($products) > 0)
 			{
 				foreach($products as $product)
 				{
@@ -556,10 +573,10 @@ class Product extends Controllers
 			$categories = $_POST['category'];
 			$data_cate = array();
 			$category = $dgClass->getProductCategories();
-			if(count($categories))
+			if(try_to_count($categories))
 			{
 				$cid = 0;
-				if(count($category))
+				if(try_to_count($category))
 				{
 					foreach($category as $val)
 					{
@@ -584,7 +601,7 @@ class Product extends Controllers
 			}
 			else
 			{
-				if(count($category))
+				if(try_to_count($category))
 				{
 					foreach($category as $val)
 					{
@@ -599,7 +616,7 @@ class Product extends Controllers
 		else
 		{
 			$category = $dgClass->getProductCategories();
-			if(count($category))
+			if(try_to_count($category))
 			{
 				foreach($category as $val)
 				{
@@ -625,6 +642,29 @@ class Product extends Controllers
 				$dgClass->redirect('index.php/product/edit/'.$data['id'].'/1');
 		}
 	}
+
+	private function strip_shortcodes( $content ) {
+	    if ( false === strpos( $content, '[' ) ) {
+	        return $content;
+	    }
+	 
+	    preg_match_all( '@\[([^<>&/\[\]\x00-\x20=]++)@', $content, $matches );
+
+	   if(isset($matches[0]))
+	    {
+	        if(try_to_count($matches[0]) > 0)
+	        {
+	            foreach($matches[0] as $val)
+	            {
+	                $str_start = strpos($content, $val);
+	                $str_end = strpos($content, str_replace("[", "[/", $val.']')) + strlen(str_replace("[", "[/", $val.']'));
+	                $str = substr($content, $str_start, $str_end - $str_start);
+	                $content = str_replace($str, "", $content);
+	            }
+	        }
+	    }
+	    return $content;
+	}
 	
 	public function Copy($id = '')
 	{
@@ -647,11 +687,11 @@ class Product extends Controllers
 		$content 				= array();
 		$content['products'] 	= $products;
 		
-		if(count($ids) > 0)
+		if(try_to_count($ids) > 0)
 		{
 			$product_id = 1;
 			$category_id = 1;
-			if (count($products) > 0)
+			if (try_to_count($products) > 0)
 			{	
 				foreach($ids as $id)
 				{
@@ -666,7 +706,7 @@ class Product extends Controllers
 							$data	= (array) $product;
 						}
 					}
-					if(count($data))
+					if(try_to_count($data))
 					{
 						$product_id = $product_id + 1;
 						$data['id'] = $product_id;
@@ -675,7 +715,7 @@ class Product extends Controllers
 						$content['products'][] = (object) $data;
 					}
 					
-					if(count($categories))
+					if(try_to_count($categories))
 					{
 						foreach($categories as $category)
 						{
@@ -691,7 +731,7 @@ class Product extends Controllers
 								$cate_id = $category->cate_id;
 								$category_data	= (array) $category;
 							}
-							if(count($category_data))
+							if(try_to_count($category_data))
 							{
 								$category_id = $category_id + 1;
 								$category_data['id'] = $category_id;
@@ -734,9 +774,9 @@ class Product extends Controllers
 				$ids = array();
 		}
 		
-		if (count($ids) > 0)
+		if (try_to_count($ids) > 0)
 		{
-			if (count($products) > 0)
+			if (try_to_count($products) > 0)
 			{
 				$content['products'] = array();
 				foreach($products as $product)
@@ -753,7 +793,7 @@ class Product extends Controllers
 			$path = dirname(ROOT) .DS. 'data' .DS. 'products.json';
 			$dgClass->WriteFile($path, $content);
 			
-			if (count($categories) > 0)
+			if (try_to_count($categories) > 0)
 			{
 				$category_data = array();
 				foreach($categories as $category)
@@ -769,6 +809,8 @@ class Product extends Controllers
 				$dgClass->WriteFile($path, $category_data);
 			}
 		}
+
+		$dgClass->redirect('index.php/product');
 	}
 	
 	public function category()
@@ -824,7 +866,7 @@ class Product extends Controllers
 			$path = dirname(ROOT) .DS. 'data' .DS. 'categories.json';
 			$check = $dgClass->WriteFile($path, json_encode($cate_data));
 		}
-		elseif(count($ids))
+		elseif(try_to_count($ids))
 		{
 			$categories = $dgClass->getCategories();
 			$cate_data = array();
@@ -988,7 +1030,7 @@ class Product extends Controllers
 		# get value csv and set to array for write products.json
 		foreach($arr as $row)
 		{
-			if (count($row) < 40) continue;
+			if (try_to_count($row) < 40) continue;
 			
 			$id 				= $row[0];
 			$title 				= $row[1];
@@ -1144,7 +1186,7 @@ class Product extends Controllers
 								$attributes_prices_el[] = $v;
 						}
 					}
-					if (count($attributes_prices_el) > 0)
+					if (try_to_count($attributes_prices_el) > 0)
 						$attributes_prices[] = $attributes_prices_el;
 				}
 				# $attributes_titles 	= $row[46];
@@ -1286,7 +1328,7 @@ class Product extends Controllers
 			$read = @fopen($csvFile, 'r');
 			while($line = fgetcsv($read)) 
 			{
-				if (!empty($line) && count($line) > 1) 
+				if (!empty($line) && try_to_count($line) > 1) 
 					$products[] = $line;
 			}
 			@fclose($read);

@@ -50,6 +50,7 @@ $designs	= array(
 		'colors'	=> array(),
 		'sizes' 	=> $design['sizes'],
 	),
+	'product_id' => $design['product_id'],
 	'cliparts' 	=> '',
 	'color' 	=> $design['colors'],
 	'images' 	=> $src,

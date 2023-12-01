@@ -19,7 +19,7 @@ if ( file_exists($file) )
 	if ($content != false && $content != '')
 	{
 		$printings = json_decode($content);		
-		if ( count($printings) )
+		if ( try_to_count($printings) )
 		{
 			foreach ($printings as $printing)
 			{

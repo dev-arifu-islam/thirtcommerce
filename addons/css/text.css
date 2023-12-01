@@ -18,6 +18,13 @@
 .mask-items-area .mask-item div.ui-resizable-e{
 	height:100%;right:-5px;top:0;width:9px;
 }
+#eproduct-build-addon span.bg-colors {
+    border: 1px solid #eee;
+}
+#eproduct-build-addon span.bg-colors img {
+    width: 100%;
+    height: 100%;
+}
 .mask-items-area .mask-item div.ui-resizable-s {
     height: 9px;
     left: 0;

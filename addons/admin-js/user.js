@@ -8,13 +8,13 @@ design.user = {
 		var password = jQuery('#'+type+'-password').val();
 		if (username == '')
 		{
-			alert_text(lang.text.username);
+			alert(lang.text.username);
 			return false;
 		}
 		
 		if (password == '')
 		{
-			alert_text(lang.text.password);
+			alert(lang.text.password);
 			return false;
 		}
 		datas.username = username;
@@ -30,7 +30,7 @@ design.user = {
 			
 			if (email == '')
 			{
-				alert_text(lang.text.email);
+				alert(lang.text.email);
 				return false;
 			}
 			datas.email = email;
@@ -91,20 +91,10 @@ design.imports.cart = function(key){
 	}).done(function( data ) {
 		if (data.error == 1)
 		{
-			alert_text(data.msg);
+			alert(data.msg);
 		}
 		else
 		{
-			if(typeof data.design.item == 'undefined')
-			{
-				data.design.item = {};
-				data.design.item.qty = 1;
-			}
-			if(typeof data.design.vectors != 'undefined' )
-			{
-				data.design.vector = data.design.vectors;
-			}
-
 			design.fonts = data.design.fonts;
 			design.imports.productColor(data.design.color);
 			if (design.fonts != '')
@@ -124,15 +114,6 @@ design.imports.cart = function(key){
 			
 			var a = document.getElementById('product-thumbs').getElementsByTagName('a');
 			design.products.changeView(a[0], 'front');
-			if(typeof data.design.design != 'undefined')
-			{
-				setTimeout(function(){
-					design.selectAll();
-					design.fitToAreaDesign();
-					design.item.updateSizes();
-					jQuery(document).triggerHandler( "update.design" );
-				}, 1500);
-			}
 		}
 	}).always(function(){
 		design.mask(false);

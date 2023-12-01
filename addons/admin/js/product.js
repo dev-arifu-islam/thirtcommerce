@@ -3,17 +3,6 @@ var productElm = {
 		jQuery('.product-elm-title').val('');
 		jQuery('.product-elm-colors a').removeClass('active');
 		jQuery('#product-elm-modal-save').attr('onclick', 'productElm.save()');
-		jQuery('.product-elm-images').html('');
-		
-		var ul = jQuery('.list-layers-images');
-		jQuery('#layers .layer').each(function(){
-			var id = jQuery(this).attr('id');
-			if(id != 'item-area-design')
-			{
-				var src = jQuery(this).find('img').attr('src');
-				ul.append('<li><a href="#"><img src="'+src+'" width="50" height="50"></a></li>');
-			}
-		});
 	},
 	addColor: function(e)
 	{
@@ -45,13 +34,11 @@ var productElm = {
 				i++;
 			}
 		});
-
-		jQuery('.product-elm-images .product-img').each(function(){
-			colors[i] = {};
-			colors[i].img = jQuery(this).find('img').attr('src');
-			jQuery(document).triggerHandler( "elem_img_save", [this, colors[i]]);
-			i++;
-		});
+		if (colors.length == 0)
+		{
+			alert('Please choose color');
+			return false;
+		}
 		
 		if (typeof id == 'undefined')
 		{
@@ -65,7 +52,6 @@ var productElm = {
 		
 		elements[id].colors = colors;
 		elements[id].title = title;
-		elements[id].colorPick = jQuery('.use_colorpick').val();
 		
 		var elm = {};
 		elm.title = title;
@@ -94,8 +80,8 @@ var productElm = {
 		{
 			var html = '<div class="form-group">'
 					+	'<div class="input-group-btn" id="'+e.id+'">'
-					+		'<button type="button" onclick="productElm.setElm(this)" class="btn btn-sm btn-default">'+e.title+'</button>'
-					+		'<button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="caret"></span></button>'
+					+		'<button type="button" onclick="productElm.setElm(this)" class="btn btn-default">'+e.title+'</button>'
+					+		'<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><span class="caret"></span></button>'
 					+		'<ul class="dropdown-menu"><li><a href="javascript:void(0)" onclick="productElm.editElm('+e.id+')">Edit</a></li><li><a href="javascript:void(0)" onclick="productElm.removeElm('+e.id+')">Remove</a></li></ul>'
 					+	'</div>'
 					+'</div>';
@@ -103,7 +89,6 @@ var productElm = {
 		}
 	},
 	editElm: function(id){
-		this.reset();
 		if (typeof elements[id] != 'undefined')
 		{
 			if (typeof elements[id].title != 'undefined')
@@ -115,37 +100,16 @@ var productElm = {
 				var colors = elements[id].colors;
 			else
 				var colors = {};
-
-			if (typeof elements[id].colorPick != 'undefined')
-				var colorPick = elements[id].colorPick;
-			else
-				var colorPick = 0;
-		}
-		else
-		{
-			var colorPick = 0
 		}
 		
 		jQuery('.product-elm-title').val(title);
-		jQuery('.use_colorpick').val(colorPick);
 		
-		var color_active = [];
-		var div = jQuery('.product-elm-images');	
+		var color_active = [];		
 		for(var i in colors)
 		{
-			if(typeof colors[i].color != 'undefined')
-			{
-				color_active[i] = colors[i].color;
-			}
-			else if(typeof colors[i].img != 'undefined')
-			{
-				var span = document.createElement('span');
-				span.className = 'product-img';
-				span.innerHTML = '<span onclick="productElm.removeImages(this)" class="btn-remove">&times;</span><img src="'+colors[i].img+'" alt="" width="90" height="90">';
-				jQuery(document).triggerHandler( "productBuild.addthumb", [span, colors[i]]);
-				div.append(span);
-			}
-		}
+			color_active[i] = colors[i].color;
+		}	
+		
 		if (color_active.length > 0)
 		{
 			jQuery('.product-elm-colors a').each(function(){
@@ -191,25 +155,6 @@ var productElm = {
 			var id = jQuery(e).parent().attr('id');
 			jQuery('#product-images .selected').children('img').data('obj', id);
 		}
-	},
-	addImages: function(images){
-		if(images.length > 0)
-		{
-			var div = jQuery('.product-elm-images');
-			for(i=0; i<images.length; i++)
-			{
-				var src = images[i];
-				var span = document.createElement('span');
-				span.className = 'product-img';
-				span.innerHTML = '<span onclick="productElm.removeImages(this)" class="btn-remove">&times;</span><img src="'+src+'" alt="" width="90" height="90">';
-				jQuery(document).triggerHandler( "productBuild.addthumb", [span, src]);
-				div.append(span);
-			}
-		}
-		jQuery.fancybox.close();
-	},
-	removeImages: function(e){
-		jQuery(e).parent().remove();
 	}
 }
 
@@ -311,7 +256,7 @@ jQuery(document).on('save.design.product', function(event, product){
 		elements_string = elements_string.replace(/"/g, "'");
 		if (jQuery('#products-design-elements').length == 0)
 		{
-			jQuery('.wapper-data-design').append('<input type="hidden" value="" id="products-design-elements" name="product[design][elements]">');
+			jQuery('.table-responsive').append('<input type="hidden" value="" id="products-design-elements" name="product[design][elements]">');
 		}
 		
 		jQuery('#products-design-elements').val(elements_string);

@@ -2,7 +2,7 @@
 /**
  * @author tshirtecommerce - www.tshirtecommerce.com
  * @date: 2015-01-10
- * 
+ *
  * @copyright  Copyright (C) 2015 tshirtecommerce.com. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE
  *
@@ -10,7 +10,7 @@
 if ( ! defined('ROOT')) exit('No direct script access allowed');
 
 class dg{
-	
+
 	public function __construct()
 	{
 		$this->path_data = ROOT .DS. 'data';
@@ -27,7 +27,7 @@ class dg{
 
 		if (file_exists($file)) {
 			$json = json_decode(file_get_contents($file), true);
-			
+
 			if (isset($json['platforms'])) {
 				$platform = $json['platforms'];
 			}
@@ -35,20 +35,25 @@ class dg{
 
 		return $platform;
 	}
-	
+
 	public function url(){
 		$pageURL = 'http';
-		
+
 		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') || (isset($_SERVER['HTTP_HTTPSSL']) && $_SERVER['HTTP_HTTPSSL'] == true)) {$pageURL .= "s";}
+
+		if(isset($_SERVER["REQUEST_SCHEME"]) && $_SERVER["REQUEST_SCHEME"] == "https")
+		{
+			$pageURL = $_SERVER["REQUEST_SCHEME"];
+		}
 		
 		$pageURL .= "://";
 		$pageURL .= $_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"];
-		
+
 		$url = explode('tshirtecommerce/', $pageURL);
-		
+
 		return $url[0];
 	}
-	
+
 	function openURL($url)
 	{
 		$data = false;
@@ -60,24 +65,24 @@ class dg{
 			$data = curl_exec($ch);
 			curl_close($ch);
 		}
-		
+
 		if( $data == false && function_exists('file_get_contents') )
 		{
 			$data = file_get_contents($url);
 		}
-		
+
 		return $data;
 	}
-	
+
 	// load language
 	public function lang($file = 'lang.ini', $cookie = true)
 	{
 		$file_lang = ROOT .DS. 'data' .DS. 'languages.json';
 		$lang = '';
 		if (file_exists($file_lang))
-		{			
+		{
 			$languages = json_decode(file_get_contents($file_lang));
-			if (count($languages))
+			if (try_to_count($languages))
 			{
 				if (!empty($_GET['lang']))
 				{
@@ -88,8 +93,8 @@ class dg{
 				{
 					$lang = $_POST['lang'];
 					$file_active = 'language_'.$lang.'.ini';
-				}				
-				
+				}
+
 				$check = true;
 				if (isset($file_active))
 				{
@@ -105,14 +110,14 @@ class dg{
 							break;
 						}
 					}
-					
+
 					if (file_exists($this->path_data .DS. $file_active) && $check_published == true)
 					{
 						$file = $file_active;
 						$check = false;
 					}
 				}
-				
+
 				if($check == true)
 				{
 					foreach($languages as $language)
@@ -129,10 +134,10 @@ class dg{
 				}
 			}
 		}
-		$file = $this->path_data .DS. $file;		
-						
+		$file = $this->path_data .DS. $file;
+
 		$GLOBALS['lang_active'] = $lang;
-		
+
 		if (file_exists($file))
 		{
 			$data = parse_ini_file($file);
@@ -146,7 +151,7 @@ class dg{
 		{
 			$data = array();
 		}
-		
+
 		// update text from extra file
 		$lang_plus = $this->path_data .DS. 'lang_plus.ini';
 		if (file_exists($lang_plus))
@@ -157,8 +162,8 @@ class dg{
 				$content 		= file_get_contents($lang_plus);
 				$langs 		= parse_ini_string($content);
 			}
-			
-			if (count($langs))
+
+			if (try_to_count($langs))
 			{
 				foreach($langs as $key => $text)
 				{
@@ -169,21 +174,26 @@ class dg{
 				}
 			}
 		}
-		
+
 		return $data;
 	}
-	
+
 	// load themes
 	public function theme($name = 'index', $product = array())
 	{
 		if(isset($product->is_mobile) && $product->is_mobile == true)
 		{
+			$layout_active 	= 'editor';
+			if( file_exists(ROOT .DS. 'themes' .DS. 'editor_pro') )
+			{
+				$layout_active 	= 'editor_pro';
+			}
 			$layouts = $this->getLayouts();
-			if(count($layouts))
+			if(try_to_count($layouts))
 			{
 				foreach($layouts as $id => $layout)
 				{
-					if($layout['theme'] == 'editor')
+					if($layout['theme'] == $layout_active)
 					{
 						$product->theme = $id;
 						break;
@@ -195,11 +205,11 @@ class dg{
 		if(isset($product->theme) && $product->theme != '')
 		{
 			$layouts = $this->getLayouts();
-			if( $layouts != false && count($layouts) && isset($layouts[$product->theme]) )
+			if( $layouts != false && try_to_count($layouts) && isset($layouts[$product->theme]) )
 			{
 				$layout = $layouts[$product->theme];
 				$new_file = ROOT .DS. 'themes' .DS. $layout['theme'] .DS. $name. '.php';
-				
+
 				if (file_exists($new_file))
 				{
 					$theme 						= $layout['theme'];
@@ -210,11 +220,11 @@ class dg{
 				}
 			}
 		}
-		
+
 		if (isset($this->settings) && $theme == '')
 		{
 			$settings = $this->settings;
-			
+
 			if ( isset($settings->themes) && $settings->themes != '' )
 			{
 				$new_file = ROOT .DS. 'themes' .DS. $settings->themes .DS. $name. '.php';
@@ -227,26 +237,26 @@ class dg{
 		}
 		$this->theme_active = $theme;
 	}
-	
+
 	public function getLayouts()
 	{
 		$file 		= ROOT .DS. 'data' .DS. 'layouts.json';
-		
+
 		if(!file_exists($file))
 		{
 			return false;
 		}
-		
+
 		$content 		= file_get_contents($file);
 		if($content !== false)
 		{
 			$layouts 			= json_decode($content, true);
 			return $layouts;
 		}
-		
+
 		return false;
 	}
-	
+
 	// load view layout
 	public function view($name, $path = '')
 	{
@@ -256,12 +266,12 @@ class dg{
 		{
 			$file_new = $this->components .DS. $path .DS. $name. '.php';
 		}
-		
+
 		$theme = '';
 		if(isset($this->product->theme) && $this->product->theme != '')
 		{
 			$layouts = $this->getLayouts();
-			if( $layouts != false && count($layouts) && isset($layouts[$this->product->theme]) )
+			if( $layouts != false && try_to_count($layouts) && isset($layouts[$this->product->theme]) )
 			{
 				$layout	 		= $layouts[$this->product->theme];
 				$theme 			= $layout['theme'];
@@ -286,13 +296,13 @@ class dg{
 					}
 				}
 			}
-			
+
 		}
-		
+
 		if ( isset($this->settings) && $theme == '' )
 		{
 			$settings = $this->settings;
-			
+
 			if ( isset($settings->themes) && $settings->themes != '' )
 			{
 				if($path != '')
@@ -309,16 +319,16 @@ class dg{
 				}
 				else
 				{
-					$temp = ROOT .DS. 'themes' .DS. $settings->themes .DS. 'components' .DS. $name. '.php';				
+					$temp = ROOT .DS. 'themes' .DS. $settings->themes .DS. 'components' .DS. $name. '.php';
 					if (file_exists($temp))
 					{
 						$file_new = $temp;
 					}
 				}
-				
+
 			}
 		}
-		
+
 		if (file_exists($file_new))
 		{
 			require_once($file_new);
@@ -326,17 +336,43 @@ class dg{
 		elseif(file_exists($file))
 		{
 			require_once($file);
-		}	
+		}
 	}
-	
+
+	public function getFontsPublish()
+	{
+		$file = ROOT .DS. 'data' .DS. 'fonts.json';
+		$fonts = array();
+
+		if (file_exists($file)) {
+			$str = file_get_contents($file);
+			$rows = json_decode($str, true);
+			if (isset($rows['fonts']) && try_to_count($rows['fonts'])) {
+				$rows = $rows['fonts'];
+			}
+
+			if (try_to_count($rows)) {
+				if (isset($rows['fonts']) && try_to_count($rows['fonts'])) {
+					foreach ($rows['fonts'] as $row) {
+						if ($row['published'] == 1) {
+							$fonts[$row['id']] = $row;
+						}
+					}
+				}
+			}
+		}
+
+		return $fonts;
+	}
+
 	// get products
 	public function getProducts()
 	{
-		$file = $this->path_data .DS. 'products.json';		
+		$file = $this->path_data .DS. 'products.json';
 		if (file_exists($file))
 		{
 			$data 		= file_get_contents($file);
-			$products 	= json_decode($data);			
+			$products 	= json_decode($data);
 			return $products->products;
 		}
 		else
@@ -344,29 +380,29 @@ class dg{
 			return array();
 		}
 	}
-	
+
 	// get attribute of product
 	public function getAttributes($attribute)
 	{
 		if (isset($attribute->name) && $attribute->name != '')
 		{
 			$attrs = new stdClass();
-			
+
 			if (is_string($attribute->name))
 				$attrs->name 		= json_decode($attribute->name);
 			else
 				$attrs->name 		= $attribute->name;
-			
+
 			if (is_string($attribute->titles))
 				$attrs->titles 		= json_decode($attribute->titles);
 			else
 				$attrs->titles 		= $attribute->titles;
-			
+
 			if (is_string($attribute->prices))
 				$attrs->prices 		= json_decode($attribute->prices);
 			else
 				$attrs->prices 		= $attribute->prices;
-			
+
 			if (is_string($attribute->type))
 				$attrs->type 		= json_decode($attribute->type);
 			else
@@ -398,14 +434,14 @@ class dg{
 				$attrs->value 		= json_decode($attribute->value);
 			else
 				$attrs->value 		= $attribute->value;
-			
+
 			$html 				= '';
 			$setttings 	= $this->getSetting();
-			for ($i=0; $i<count($attrs->name); $i++)
+			for ($i=0; $i<try_to_count($attrs->name); $i++)
 			{
 				$html 	.= '<div class="form-group product-fields">';
 				$html 	.= 		'<label for="fields">'.$attrs->name[$i].'</label>';
-				
+
 				$id 	 	= 'attribute['.$i.']';
 				$options 	= array(
 					'name' => $attrs->name[$i],
@@ -430,7 +466,7 @@ class dg{
 				{
 					$html 	.= $this->field($options, $setttings);
 				}
-				
+
 				$html 	.= '</div>';
 			}
 			return $html;
@@ -439,20 +475,20 @@ class dg{
 		{
 			return '';
 		}
-	
+
 	}
-	
+
 	function attributePrice($price, $setttings)
 	{
 		$html = '';
-		
+
 		if ($price != '' && $price != '0')
 		{
 			if ( isset($setttings->currency_symbol) )
 				$currency = $setttings->currency_symbol;
 			else
 				$currency = '$';
-			
+
 			if ( strpos($price, '-') !== false)
 			{
 				$price = str_replace('-', '', $price);
@@ -468,7 +504,7 @@ class dg{
 				$price = $price;
 				$add 	= '+';
 			}
-			
+
 			if (isset($setttings->currency_postion) && $setttings->currency_postion == 'right')
 				$html = ' ('.$add.$price.$currency.')';
 			else
@@ -476,7 +512,7 @@ class dg{
 		}
 		return $html;
 	}
-	
+
 	function field_action($options, $setttings)
 	{
 		$name 		= $options['name'];
@@ -508,7 +544,7 @@ class dg{
 		switch($obj)
 		{
 			case 'image':
-				for ($i=0; $i<count($title); $i++)
+				for ($i=0; $i<try_to_count($title); $i++)
 				{
 					if( isset($obj_value[$i]) &&  $obj_value[$i] != '')
 					{
@@ -521,25 +557,25 @@ class dg{
 					}
 				}
 			break;
-			
+
 			default:
 				$html .= '<select '.$action.' class="form-control input-sm '.$class_required.'" name="'.$id.'">';
-				
-				for ($i=0; $i<count($title); $i++)
+
+				for ($i=0; $i<try_to_count($title); $i++)
 				{
 					if ($price[$i] != '0')
 						$html_price = $this->attributePrice($price[$i], $setttings);
 					else
 						$html_price = '';
-					
+
 					$html .= '<option data-value="'.$obj_value[$i].'" value="'.$i.'">'.$title[$i].$html_price.'</option>';
 				}
-				
+
 				$html .= '</select>';
 			break;
 		}
 		$html	.= '</div>';
-		
+
 		return $html;
 	}
 
@@ -561,35 +597,35 @@ class dg{
 		switch($type)
 		{
 			case 'checkbox':
-				for ($i=0; $i<count($title); $i++)
+				for ($i=0; $i<try_to_count($title); $i++)
 				{
 					$html .= '<label class="checkbox-inline">';
-					$html .= 	'<input type="checkbox" name="'.$id.'['.$i.']" value="'.$i.'"> '.$title[$i];					
-					
+					$html .= 	'<input type="checkbox" name="'.$id.'['.$i.']" value="'.$i.'"> '.$title[$i];
+
 					$html .= $this->attributePrice($price[$i], $setttings);
-					
+
 					$html .= '</label>';
 				}
 			break;
-			
+
 			case 'selectbox':
 				$html .= '<select class="form-control input-sm" name="'.$id.'">';
-				
-				for ($i=0; $i<count($title); $i++)
+
+				for ($i=0; $i<try_to_count($title); $i++)
 				{
 					if ($price[$i] != '0')
 						$html_price = $this->attributePrice($price[$i], $setttings);
 					else
 						$html_price = '';
-					
+
 					$html .= '<option value="'.$i.'">'.$title[$i].$html_price.'</option>';
 				}
-				
+
 				$html .= '</select>';
 			break;
-			
+
 			case 'radio':
-				for ($i=0; $i<count($title); $i++)
+				for ($i=0; $i<try_to_count($title); $i++)
 				{
 					$html .= '<label class="radio-inline">';
 					$html .= 	'<input type="radio" name="'.$id.'" value="'.$i.'"> '.$title[$i];
@@ -597,39 +633,39 @@ class dg{
 					$html .= '</label>';
 				}
 			break;
-			
+
 			case 'textlist':
 				$html 		.= '<style>.product-quantity{display:none;}</style><ul class="p-color-sizes list-number col-md-12">';
-				for ($i=0; $i<count($title); $i++)
+				for ($i=0; $i<try_to_count($title); $i++)
 				{
 					$html .= '<li>';
-					
+
 					if ($price[$i] != '0')
 						$html_price = '<small>'.$this->attributePrice($price[$i], $setttings).'</small>';
 					else
 						$html_price = '';
-					
+
 					$html .= 	'<label data-id="'.$title[$i].'">'.$title[$i].$html_price.'</label>';
-					$html .= 	'<input type="text" class="form-control input-sm size-number" name="'.$id.'['.$i.']">';					
+					$html .= 	'<input type="text" class="form-control input-sm size-number" name="'.$id.'['.$i.']">';
 					$html .= '</li>';
 				}
 				$html 		.= '</ul>';
 			break;
 		}
 		$html	.= '</div>';
-		
+
 		return $html;
 	}
-	
+
 	public function quantity($min = 1, $name = 'Quantity', $name2 = 'minimum quantity: '){
 		$min = (int) $min; // fix default quantity.
 		if ($min < 0) $min = 0; // fix default quantity.
-		
+
 		$html = '<div class="form-group product-fields product-quantity">';
 		$html .= 	'<label>'.$name.'</label>';
 		$html .= 	'<input type="text" class="form-control input-sm" value="'.$min.'" data-count="'.$min.'" name="quantity" id="quantity">';
 		$html .= '</div>';
-		
+
 		$css = '';
 		if($min <= 1)
 		{
@@ -638,18 +674,18 @@ class dg{
 		$html .= '<div class="form-group product-fields" '.$css.'>'
 			  . '<span class="help-block"><small>'.$name2.$min.'</small></span>'
 			  . '</div>';
-		
+
 		return $html;
 	}
-	
+
 	// get products
 	public function getSetting()
 	{
-		$file = $this->path_data .DS. 'settings.json';		
+		$file = $this->path_data .DS. 'settings.json';
 		if (file_exists($file))
 		{
-			$data 		= file_get_contents($file);			
-			$settings 	= json_decode($data);			
+			$data 		= file_get_contents($file);
+			$settings 	= json_decode($data);
 			return $settings;
 		}
 		else
@@ -657,7 +693,7 @@ class dg{
 			return array();
 		}
 	}
-	
+
 	/**
 	 * Write File
 	 *
@@ -683,7 +719,7 @@ class dg{
 
 		return TRUE;
 	}
-	
+
 	public function folder($type = 'uploaded')
 	{
 		$date 	= new DateTime();
@@ -691,34 +727,34 @@ class dg{
 		$root 	= $type .DS. $year;
 		if (!file_exists(ROOT .DS. $root))
 			mkdir(ROOT .DS. $root, 0755);
-		
+
 		$month 	= $date->format('m');
 		$root 	= $root .DS. $month .DS;
 		if (!file_exists(ROOT .DS. $root))
 			mkdir(ROOT .DS. $root, 0755);
-		
+
 		return $root;
 	}
-	
+
 	// get all file in foder
 	public function getFiles($path, $exten = '.txt')
 	{
 		if (file_exists($path))
 		{
 			$files = scandir($path);
-			if (count($files) == 0)
+			if (try_to_count($files) == 0)
 				return false;
-			
+
 			$list = array();
-			for($i=0; $i<count($files); $i++)
+			for($i=0; $i<try_to_count($files); $i++)
 			{
 				if (strpos($files[$i], $exten) > 0)
 				{
 					$list[] = $files[$i];
 				}
 			}
-			if (count($list) == 0) return false;
-			
+			if (try_to_count($list) == 0) return false;
+
 			return $list;
 		}
 		else
@@ -726,25 +762,25 @@ class dg{
 			return false;
 		}
 	}
-	
+
 	// qrcode
 	public function qrcode($text)
-	{	
+	{
 		include_once ROOT .DS. 'includes' .DS. 'libraries' .DS. 'qrcode.php';
 		$qr = new qrcode();
 		$qr->setText($text);
-		
+
 		$image = $qr->getImage(500);
-		
+
 		$root = $this->folder();
-		
+
 		$file = 'qrcode-'.strtotime("now") . '.png';
-		
+
 		$this->WriteFile(ROOT .DS. $root . $file, $image);
-		
+
 		return str_replace('\\', '/', $root .DS. $file);
 	}
-	
+
 	// categories art
 	public function categoriestree($return = true)
 	{
@@ -754,7 +790,7 @@ class dg{
 		{
 			$str	= file_get_contents($path);
 			$categories = json_decode($str);
-			if (count($categories) > 0)
+			if (try_to_count($categories) > 0)
 			{
 				$new = array();
 				foreach ($categories as $a){
@@ -765,7 +801,7 @@ class dg{
 					$tree = $this->createTree($new, $new[0]);
 				else
 					$tree = $this->createTree($new, $new);
-				
+
 				$categories = $tree;
 			}
 		}
@@ -775,14 +811,14 @@ class dg{
 		$all[0]->title 		= lang('design_all_art', true);
 		$all[0]->children 	= array();
 		$all[0]->parent_id 	= 0;
-			
-			
+
+
 		$categories = array_merge($all, $categories);
-		
+
 		if ($return === true)
 		{
 			return $categories;
-			
+
 		}
 		else
 		{
@@ -790,19 +826,19 @@ class dg{
 			exit();
 		}
 	}
-	
+
 	public function createTree(&$list, $parent){
 		$tree = array();
 		foreach ($parent as $k=>$l){
 			if(isset($list[$l->id])){
 				$l->children = $this->createTree($list, $list[$l->id]);
-				if ( count($l->children) > 0) $l->isFolder = true;	
+				if ( try_to_count($l->children) > 0) $l->isFolder = true;
 			}
 			$tree[] = $l;
-		} 
+		}
 		return $tree;
 	}
-	
+
 	// setup cache
 	public function cache($folder = 'design')
 	{
@@ -811,30 +847,30 @@ class dg{
 		phpFastCache::setup("path", ROOT .DS. 'cache');
 		phpFastCache::setup("securityKey", $folder);
 		$cache = phpFastCache();
-		
+
 		return $cache;
 	}
-	
+
 	public function saveDesign()
 	{
 		$results	= array();
-		
+
 		$data = json_decode(file_get_contents('php://input'), true);
 
 		if (session_id() === "")
 		{
-			session_start(); 
+			session_start();
 		}
-		
-		if (empty($_SESSION['is_logged']) || (isset($_SESSION['is_logged']) && $_SESSION['is_logged'] === false && $_SESSION['is_logged'] === false && empty($data['is_share'])))
+
+		if ( empty($_SESSION['is_logged']) && empty($data['is_share']) )
 		{
 			$results['error'] = 1;
 			$results['login'] = 1;
-			$results['msg']	= lang('design_save_login');
+			$results['msg']	= lang('design_save_login', true);
 			echo json_encode($results);
 			exit;
-		}		
-		
+		}
+
 		// check user login
 		if(isset($_SESSION['is_logged']))
 		{
@@ -848,10 +884,10 @@ class dg{
 			);
 		}
 		$user 		= md5($is_logged['id']);
-		
+
 		$uploaded 	= $this->folder();
 		$path		= ROOT .DS. $uploaded;
-		
+
 		if(isset($data['isIE']) && $data['isIE'] == 'true')
 		{
 			$buffer		= $data['image'];
@@ -861,24 +897,24 @@ class dg{
 			$temp 		= explode(';base64,', $data['image']);
 			$buffer		= base64_decode($temp[1]);
 		}
-		
+
 		$design 					= array();
-		
+
 		if (isset($data['options']))
 		{
-			$design['options']		= $data['options'];	
+			$design['options']		= $data['options'];
 		}
-		
+
 		if(empty($data['teams'])) $data['teams'] = '';
 		if(empty($data['design_file'])) $data['design_file'] = '';
 		if(empty($data['design_key'])) $data['design_key'] = '';
 
-		$design['vectors']		= $data['vectors'];		
-		$design['teams']			= $data['teams'];	
+		$design['vectors']		= $data['vectors'];
+		$design['teams']			= $data['teams'];
 		$design['fonts']			= $data['fonts'];
-				
+
 		$designer_id			= $data['designer_id'];
-		
+
 		// check design and author
 		if ($data['design_file'] != '' && $designer_id == $user && $data['design_key'] != '')
 		{
@@ -893,8 +929,8 @@ class dg{
 			{
 				$file		= str_replace('.svg', '.png', $file);
 			}
-			
-			$path_file			= $path . $file;	
+
+			$path_file			= $path . $file;
 			$file				= str_replace('\\', '/', $uploaded) .'/'. $file;
 			$file				= str_replace('//', '/', $file);
 			$key				= $data['design_key'];
@@ -902,7 +938,7 @@ class dg{
 		}
 		else
 		{
-			
+
 			$key 		= strtotime("now"). rand();
 			if(isset($data['isIE']) && $data['isIE'] == 'true')
 			{
@@ -912,11 +948,11 @@ class dg{
 			{
 				$file 	=  'design-' . $key . '.png';
 			}
-			
+
 			$path_file	= $path .DS. $file;
 			$file		= str_replace('\\', '/', $uploaded) .'/'. $file;
-			$file		= str_replace('//', '/', $file);		
-			
+			$file		= str_replace('//', '/', $file);
+
 			$design['design_id'] 		= $key;
 		}
 		if ( ! $this->WriteFile($path_file, $buffer))
@@ -936,34 +972,34 @@ class dg{
 			}
 			$myDesign = $cache->get($user);
 			if ( $myDesign == null )
-			{			
+			{
 				$myDesign = array();
 			}
-			
+
 			if (isset($data['attribute']))
 				$design['attribute']  	= $data['attribute'];
-			
+
 			if (isset($data['print_type']))
 				$design['print_type']  	= $data['print_type'];
-			
+
 			$design['image']			= $file;
 			$design['parent_id']		= $data['parent_id'];
 			$design['product_id']		= $data['product_id'];
 			$design['product_options']  	= $data['product_color'];
-			
+
 			if(empty($data['cliparts'])) $data['cliparts'] = '{}';
 			if(empty($data['colors'])) $data['colors'] = '{}';
 			if(empty($data['print'])) $data['print'] = '{}';
 			if(empty($data['images'])) $data['images'] = array();
 			if(empty($data['title'])) $data['title'] = '';
 			if(empty($data['description'])) $data['description'] = '';
-			
+
 			$design['cliparts']  		= $data['cliparts'];
 			$design['colors']  		= $data['colors'];
 			$design['print']  		= $data['print'];
 			$design['images']  		= $data['images'];
 
-			if(isset($data['thumbs']) && count($data['thumbs']) > 0)
+			if(isset($data['thumbs']) && try_to_count($data['thumbs']) > 0)
 			{
 				$design['thumbs'] 	= array();
 				foreach($data['thumbs'] as $view => $str)
@@ -979,9 +1015,9 @@ class dg{
 					$design['thumbs'][$view]	= $view_file;
 				}
 			}
-			
+
 			// create images of design
-			if(isset($design['images']) && count($design['images']) > 0)
+			if(isset($design['images']) && try_to_count($design['images']) > 0)
 			{
 				foreach($design['images'] as $view => $str)
 				{
@@ -1016,7 +1052,7 @@ class dg{
 			}
 			$design['title']  		= $data['title'];
 			$design['description']  	= $data['description'];
-			
+
 			// save design to cache
 			$myDesign[$key]	= array(
 				'id' 			=> $key,
@@ -1035,32 +1071,32 @@ class dg{
 			}
 			$cache->set($key, $design);
 			$cache->set($user, $myDesign);
-			
+
 			$results['error'] = 0;
-			
+
 			$content = array(
 				'user_id'=> $user,
 				'design_id'=> $key,
 				'design_key'=> $key,
 				'designer_id'=> $user,
-				'design_file'=> $file,					
+				'design_file'=> $file,
 			);
 			if(isset($design['thumbs']))
 			{
 				$content['thumbs']	= $design['thumbs'];
-			}				
-			$results['content'] = $content;	
+			}
+			$results['content'] = $content;
 
 		}
-		
+
 		echo json_encode($results);
 		exit;
 	}
-	
+
 	public function getTax($id)
 	{
 		$file = ROOT .DS. 'data' .DS. 'taxes.json';
-		
+
 		if (file_exists($file))
 		{
 			$content = file_get_contents($file);
@@ -1071,7 +1107,7 @@ class dg{
 			else
 			{
 				$data = json_decode($content);
-				if (count($data))
+				if (is_object($data))
 				{
 					foreach($data as $key => $value)
 					{
@@ -1085,14 +1121,14 @@ class dg{
 		}
 		return false;
 	}
-	
+
 	// get price of design
-	public function prices($data, $add_tax = true)
+	public function prices($data, $add_tax = true, $is_real = false)
 	{
 		// get data post
 		$product_id		= $data['product_id'];
 		$colors		= $data['colors'];
-		$print		= $data['print'];		
+		$print		= $data['print'];
 		$quantity		= $data['quantity'];
 
 		if($quantity == 0)
@@ -1103,10 +1139,10 @@ class dg{
 			$total->clipart 	= 0;
 			$total->old 	= 0;
 			$total->sale 	= 0;
-			
+
 			return $total;
-		}	
-		
+		}
+
 		// get attribute
 		if ( isset( $data['attribute'] ) )
 		{
@@ -1116,7 +1152,7 @@ class dg{
 		{
 			$attribute		= false;
 		}
-				
+
 		if ($quantity < 0 ) $quantity = 0;
 
 		if($quantity == 0) {
@@ -1129,10 +1165,10 @@ class dg{
 		if($product == null)
 		{
 			// load product
-			$products 		= $this->getProducts();		
+			$products 		= $this->getProducts();
 			$product 		= false;
 
-			for($i=0; $i < count($products); $i++)
+			for($i=0; $i < try_to_count($products); $i++)
 			{
 				if ($product_id == $products[$i]->id)
 				{
@@ -1145,7 +1181,7 @@ class dg{
 				$cache->set('product_'.$product_id, $product, 300);
 			}
 		}
-		
+
 		if ($product === false)
 		{
 			echo json_encode( array('error' => 'Product could not be found') );
@@ -1153,44 +1189,49 @@ class dg{
 		}
 		else
 		{
-			
+
 			// load cart
 			include_once (ROOT .DS. 'includes' .DS. 'cart.php');
-			$cart 		= new dgCart();	
+			$cart 		= new dgCart();
 			$post 		= array(
 				'colors' 		=> $colors,
 				'print' 		=> $print,
 				'attribute' 	=> $attribute,
 				'quantity' 		=> $quantity,
-				'product_id' 	=> $product_id					
+				'product_id' 	=> $product_id
 			);
-			
-			// load setting			
-			$setting 		= $this->getSetting();	
+			if( isset($data['variation_id']) )
+			{
+				$post['variation_id'] = $data['variation_id'];
+			}
+
+			// load setting
+			$setting 		= $this->getSetting();
 			$number 		= setValue($setting, 'price_number', 2);
 			$price_thousand 	= setValue($setting, 'price_thousand', ',');
 			$price_decimal 	= setValue($setting, 'price_decimal', '.');
-			
-			include_once(ROOT .DS. 'includes' .DS. 'addons.php');					
+
+			include_once(ROOT .DS. 'includes' .DS. 'addons.php');
 			$addons 	= new addons();
 			$params = array(
 				'data' => $data,
-				'product' => $product,				
-				'setting' => $setting,			
-				'post' => $post,			
+				'product' => $product,
+				'setting' => $setting,
+				'post' => $post,
+				'dg' => $this
 			);
-			
-			$addons->view('hooks' .DS. 'product', $params);	
-			
-					
+
+			$addons->view('hooks' .DS. 'product', $params);
+
+
 			$result 		= $cart->totalPrice($product, $post, $setting);
-						
+
 			$params = array(
 				'data' => $data,
-				'product' => $product,				
-				'setting' => $setting,			
-				'result' => $result,			
-				'post' => $post				
+				'product' => $product,
+				'setting' => $setting,
+				'result' => $result,
+				'post' => $post
 			);
 			$addons->view('hooks' .DS. 'fields', $params);
 
@@ -1203,18 +1244,18 @@ class dg{
 			{
 				$artStore = array();
 			}
-			
+
 			/* get cliparts on website */
 			$clipartsPrice = array();
-			if (isset($data['cliparts']) && count($data['cliparts']) > 0)
+			if (isset($data['cliparts']) && try_to_count($data['cliparts']) > 0)
 			{
-				if(count($artStore))
+				if(try_to_count($artStore))
 				{
 					$cliparts = array();
 					foreach($data['cliparts'] as $view => $arts)
 					{
 						$cliparts[$view]	= array();
-						if(count($arts))
+						if(try_to_count($arts))
 						{
 							foreach($arts as $art)
 							{
@@ -1232,21 +1273,22 @@ class dg{
 					$clipartsPrice = $cart->getPriceArt($data['cliparts']);
 				}
 			}
-			
+
 			$result->cliparts = $clipartsPrice;
 			$result->quantity = $quantity;
-			
+
 			$total	= new stdClass();
-			$total->old = (float)$cart->priceFormart($result->price->base) + (float)$cart->priceFormart($result->price->colors) + (float)$cart->priceFormart($result->price->prints);
-						
-			$print_discount = 0;																						
+			$total->old = (float)$cart->priceFormart($result->price->base) + (float)$cart->priceFormart($result->price->colors) + (float)$cart->priceFormart($result->price->prints_not_discount);
+
+			$print_discount = 0;
 			if(isset($result->price->print_discount)) $print_discount = (float)$cart->priceFormart($result->price->print_discount);
-			
+
 			$total->printing 	= (float)$cart->priceFormart($result->price->prints) - (float)$print_discount;
 			$total->sale 		= (float)$cart->priceFormart($result->price->sale) + (float)$cart->priceFormart($result->price->colors) + (float)$cart->priceFormart($total->printing);
-			
+			$total->colors = (float)$cart->priceFormart($result->price->colors);
+
 			$price_clipart = 0;
-			if (count($result->cliparts))
+			if (try_to_count($result->cliparts))
 			{
 				foreach($result->cliparts as $id=>$amount)
 				{
@@ -1259,8 +1301,8 @@ class dg{
 			if(!isset($total->clipart))
 				$total->clipart = 0;
 			$total->clipart 	= $price_clipart;
-			
-			if (empty($result->price->attribute))				
+
+			if (empty($result->price->attribute))
 			{
 				$result->price->attribute = 0;
 			}
@@ -1268,17 +1310,17 @@ class dg{
 			$total->sale 	= ($total->sale * $quantity) + $result->price->attribute;
 
 			$total->attribute = $result->price->attribute/$quantity;
-			
+
 			// get price arts of store
-			if(count($artStore))
-			{			
+			if(try_to_count($artStore))
+			{
 				include_once(ROOT .DS. 'includes' .DS. 'store.php');
 				$store	= new store($setting);
 				$ids	= array();
 				foreach($artStore as $art_id)
 				{
 					if (in_array($art_id, $ids)) continue;
-					
+
 					$ids[]		= $art_id;
 					$art_price 		= $store->getPrice($art_id);
 					$total->old 	= $total->old + $art_price;
@@ -1286,7 +1328,7 @@ class dg{
 					$total->clipart 	= $total->clipart + $art_price;
 				}
 			}
-			
+
 			// check add tax or not
 			if ( isset($data['noTax']) && $data['noTax'] == 0)
 			{
@@ -1319,7 +1361,7 @@ class dg{
 					}
 				}
 			}
-			
+
 			$params = array(
 				'setting' => $setting,
 				'data' => $data,
@@ -1330,35 +1372,75 @@ class dg{
 			$addons->view('hooks' .DS. 'extends', $params);
 			if (property_exists($total, 'number') && $total->number > 0) {
 				$number = $total->number;
-			}		
-			
+			}
+
 			if($quantity == 0)
 				$avg = 0;
 			else
 				$avg = $total->sale/$quantity;
-			
-			$total->item 	= number_format($avg, $number, $price_decimal, $price_thousand);
-			
-			$total->printing 	= number_format($total->printing, $number, $price_decimal, $price_thousand);
-			$total->clipart 	= number_format($total->clipart, $number, $price_decimal, $price_thousand);
-			$total->old 	= number_format($total->old, $number, $price_decimal, $price_thousand);
-			$total->sale 	= number_format($total->sale, $number, $price_decimal, $price_thousand);
-			
+
+			if ($is_real === false) {
+				$total->item 	= number_format($avg, $number, $price_decimal, $price_thousand);
+
+				$total->printing 	= number_format($total->printing, $number, $price_decimal, $price_thousand);
+				$total->clipart 	= number_format($total->clipart, $number, $price_decimal, $price_thousand);
+				$total->old 	= number_format($total->old, $number, $price_decimal, $price_thousand);
+				$total->sale 	= number_format($total->sale, $number, $price_decimal, $price_thousand);
+			} else {
+				$total->item = $avg;
+				$total->printing = $total->printing;
+				$total->clipart = $total->clipart;
+				$total->old = $total->old;
+				$total->sale = $total->sale;
+			}
+
 			return $total;
-		}	
+		}
 	}
-	
+
+	public function str_replace_last($search, $replace, $str)
+	{
+	    if (($pos = strrpos($str, $search)) !== false) {
+	        $search_length = strlen($search);
+	        $str = substr_replace($str, $replace, $pos, $search_length);
+	    }
+
+	    return $str;
+	}
+
+	public function prints_confirm_colors()
+	{
+		$data = array();
+		$haystack = array('color', 'color_size');
+
+		$file = ROOT .DS. 'data' .DS. 'printings.json';
+		if (file_exists($file)) {
+			$content = file_get_contents($file);
+			if ($content != false && !empty($content)) {
+				$printings = json_decode($content, true);
+				if (try_to_count($printings)) {
+					foreach ($printings as $printing) {
+						if (isset($printing['price_type']) && in_array($printing['price_type'], $haystack)) {
+							$data[] = $printing['printing_code'];
+						}
+					}
+				}
+			}
+		}
+		return $data;
+	}
+
 	public function getPrintingType($printing_code)
 	{
 		$data 			= array();
 		$file 			= ROOT .DS. 'data' .DS. 'printings.json';
 		if ( file_exists($file) )
 		{
-			$content 	= file_get_contents($file);			
+			$content 	= file_get_contents($file);
 			if ($content != false && $content != '')
 			{
-				$printings = json_decode($content);				
-				if ( count($printings) )
+				$printings = json_decode($content);
+				if ( try_to_count($printings) )
 				{
 					foreach ($printings as $printing)
 					{
@@ -1366,7 +1448,7 @@ class dg{
 						if ( $printing->printing_code == $printing_code )
 						{
 							$code_type	= ROOT .DS. 'addons' .DS. 'printings' .DS. $printing->price_type.'.json';
-							
+
 							if ( file_exists ($code_type) )
 							{
 								$data = $printing;
@@ -1379,7 +1461,7 @@ class dg{
 		}
 		return $data;
 	}
-	
+
 	public function getSVG($post)
 	{
 		$art_id 		= 0;
@@ -1393,26 +1475,26 @@ class dg{
 		$colors 		= '[]';
 		if(isset($post['colors']))
 			$colors		= $post['colors'];
-		
-		if($art_id > 0)			
+
+		if($art_id > 0)
 			$file 		= $url . 'print/' . $file_name;
 		else
 			$file 		= $url . '/' . $file_name;
-		
+
 		include_once (ROOT .DS. 'includes' .DS. 'libraries' .DS. 'svg.php');
-					
+
 		$data = array();
 		$size = array();
-		
+
 		$size['height'] = 100;
 		$size['width'] = 100;
-		
+
 		$xml = new svg($file, true);
-			
+
 		// get width, heigh of svg file
 		$width = $xml->getWidth();
 		$height = $xml->getHeight();
-		
+
 		// calculated width, height
 		if($width > $height){
 			$newHeight = $size['height'];
@@ -1421,18 +1503,18 @@ class dg{
 			$newWidth = $size['width'];
 			$newHeight = ($size['width'] / $width) * $height;
 		}
-		
+
 		// set width, height
 		$xml->setWidth($newWidth.'px');
 		$xml->setHeight($newHeight.'px');
 
 		$data['content'] 		= $xml->asXML();
-		$data['info']['type'] 	= 'svg';				
+		$data['info']['type'] 	= 'svg';
 		$data['info']['colors'] = is_array($colors) ? $colors : json_decode($colors);
 
 		$data['size']['width'] 	= $newWidth . 'px';
 		$data['size']['height'] = $newHeight . 'px';
-		
+
 		return $data;
 	}
 
@@ -1440,8 +1522,8 @@ class dg{
 	{
 		$products 		= $this->getProducts();
 		$product 		= false;
-		
-		for($i=0; $i < count($products); $i++)
+
+		for($i=0; $i < try_to_count($products); $i++)
 		{
 			if ($product_id == $products[$i]->id)
 			{
@@ -1472,16 +1554,16 @@ class dg{
 
 		return $product;
 	}
-	
+
 	// add to cart
 	public function addCart($data)
 	{
 		// get data post
 		$product_id		= $data['product_id'];
 		$colors			= $data['colors'];
-		$print			= $data['print'];		
-		$quantity		= $data['quantity'];		
-				
+		$print			= $data['print'];
+		$quantity		= $data['quantity'];
+
 		// get attribute
 		if ( isset( $data['attribute'] ) )
 		{
@@ -1491,11 +1573,11 @@ class dg{
 		{
 			$attribute		= false;
 		}
-				
+
 		if ($quantity < 1 ) $quantity = 1;
-		
-		$time = strtotime("now");			
-		
+
+		$time = strtotime("now");
+
 		if (isset($data['cliparts']))
 		{
 			$cliparts = $data['cliparts'];
@@ -1504,10 +1586,10 @@ class dg{
 		{
 			$cliparts = false;
 		}
-		
+
 		$content = array();
 		$content['error'] = 1;
-		
+
 		// load product
 		$child_id = 0;
 		if(isset($data['child_id']))
@@ -1515,56 +1597,60 @@ class dg{
 			$child_id 	= $data['child_id'];
 		}
 		$product = $this->getProductchild($product_id, $child_id);
-		
+
 		if ($product === false)
 		{
 			$content['msg'] = 'Product could not be found';
 		}
 		else
-		{	
+		{
 			$content['error'] = 0;
 			// load cart
 			include_once (ROOT .DS. 'includes' .DS. 'cart.php');
-			$cart 		= new dgCart();	
+			$cart 		= new dgCart();
 			$post 		= array(
 				'colors' 		=> $colors,
 				'print' 		=> $print,
 				'attribute' 	=> $attribute,
 				'quantity' 		=> $quantity,
-				'product_id' 	=> $product_id					
+				'product_id' 	=> $product_id
 			);
-			
-			// load setting			
+			if( isset($data['variation_id']) )
+			{
+				$post['variation_id'] = $data['variation_id'];
+			}
+
+			// load setting
 			$setting 			= $this->getSetting();
 			$price_thousand 		= setValue($setting, 'price_thousand', ',');
  			$price_decimal 		= setValue($setting, 'price_decimal', '.');
-			
-			include_once(ROOT .DS. 'includes' .DS. 'addons.php');					
+
+			include_once(ROOT .DS. 'includes' .DS. 'addons.php');
 			$addons 	= new addons();
 			$params = array(
 				'data' 		=> $data,
-				'product' 	=> $product,				
+				'product' 	=> $product,
 				'setting' 	=> $setting,
 				'post'	 	=> $post
 			);
-			
-			$addons->view('hooks' .DS. 'product', $params);	
-			
+
+			$addons->view('hooks' .DS. 'product', $params);
+
 			$result 		= $cart->totalPrice($product, $post, $setting);
-						
+
 			$params = array(
 				'data' => $data,
-				'product' => $product,				
+				'product' => $product,
 				'setting' => $setting,
 				'result' => $result,
 				'post' => $post
 			);
 			$addons->view('hooks' .DS. 'fields', $params);
-						
+
 			$result->product	= new stdClass();
 			$result->product->name 	= $product->title;
 			$result->product->sku 	= $product->sku;
-			
+
 			// get art of store
 			if(isset($data['artStore']))
 			{
@@ -1574,18 +1660,18 @@ class dg{
 			{
 				$artStore = array();
 			}
-			
+
 			// get cliparts
 			$clipartsPrice = array();
-			if (isset($data['cliparts']) && count($data['cliparts']) > 0)
+			if (isset($data['cliparts']) && try_to_count($data['cliparts']) > 0)
 			{
-				if(count($artStore))
+				if(try_to_count($artStore))
 				{
 					$cliparts = array();
 					foreach($data['cliparts'] as $view => $arts)
 					{
 						$cliparts[$view]	= array();
-						if(count($arts))
+						if(try_to_count($arts))
 						{
 							foreach($arts as $art)
 							{
@@ -1602,62 +1688,62 @@ class dg{
 				{
 					$clipartsPrice = $cart->getPriceArt($data['cliparts']);
 				}
-			}					
+			}
 			$result->cliparts = $clipartsPrice;
-			
+
 			if($result->price->colors == '')
 				$result->price->colors = 0;
 			if($result->price->prints == '')
 				$result->price->prints = 0;
-				
-			$total	= new stdClass();			
+
+			$total	= new stdClass();
 			$total->old = $cart->priceFormart($result->price->base) + $cart->priceFormart($result->price->colors) + $cart->priceFormart($result->price->prints);
-			
+
 			$print_discount = 0;
 			if(isset($result->price->print_discount)) $print_discount = $cart->priceFormart($result->price->print_discount);
 			$total->sale = $cart->priceFormart($result->price->sale) + $cart->priceFormart($result->price->colors) + $cart->priceFormart($result->price->prints) - $print_discount;
-			
-			if (count($result->cliparts))
+
+			if (try_to_count($result->cliparts))
 			{
 				foreach($result->cliparts as $id=>$amount)
 				{
 					$amount 		= $cart->priceFormart($amount);
 					$total->old 	= $total->old + $amount;
-					$total->sale 	= $total->sale + $amount;				
+					$total->sale 	= $total->sale + $amount;
 				}
-			}		
-			
-			if (empty($result->price->attribute))				
+			}
+
+			if (empty($result->price->attribute))
 			{
 				$result->price->attribute = 0;
 			}
 			$total->old 	= ($total->old * $quantity) + $result->price->attribute;
 			$total->sale 	= ($total->sale * $quantity) + $result->price->attribute;
-			
+
 			// get price arts of store
-			if(count($artStore))
-			{			
+			if(try_to_count($artStore))
+			{
 				include_once(ROOT .DS. 'includes' .DS. 'store.php');
 				$store	= new store($setting);
 				$ids	= array();
 				foreach($artStore as $art_id)
 				{
 					if (in_array($art_id, $ids)) continue;
-					
+
 					$ids[]			= $art_id;
 					$art_price 		= $store->getPrice($art_id);
 					$total->old 	= $total->old + $art_price;
-					$total->sale 	= $total->sale + $art_price;					
+					$total->sale 	= $total->sale + $art_price;
 				}
 			}
-			
+
 			$result->total 	= $total;
-			
+
 			// get symbol
 			if (!isset($setting->currency_symbol))
 				$setting->currency_symbol = '$';
 			$result->symbol = $setting->currency_symbol;
-			
+
 			// save file image design
 			$path = $this->folder();
 			$design = array();
@@ -1666,21 +1752,21 @@ class dg{
 				$data['design']['isIE'] = false;
 			if (isset($data['design']['images']['front']))
 				$design['images']['front'] 	= $this->createFile($data['design']['images']['front'], $path, 'cart-front-'.$time, $data['design']['isIE']);
-					
-			if (isset($data['design']['images']['back']))	
+
+			if (isset($data['design']['images']['back']))
 				$design['images']['back'] 	= $this->createFile($data['design']['images']['back'], $path, 'cart-back-'.$time, $data['design']['isIE']);
-				
+
 			if (isset($data['design']['images']['left']))
 				$design['images']['left'] 	= $this->createFile($data['design']['images']['left'], $path, 'cart-left-'.$time, $data['design']['isIE']);
-				
+
 			if (isset($data['design']['images']['right']))
 				$design['images']['right']	= $this->createFile($data['design']['images']['right'], $path, 'cart-right-'.$time, $data['design']['isIE']);
-				
+
 			if (empty($result->options)) $result->options = array();
-			
+
 			if (isset($data['teams'])) $teams = $data['teams'];
 			else $teams = '';
-						
+
 			$params = array(
 				'data' => $data,
 				'result' => $result,
@@ -1688,7 +1774,7 @@ class dg{
 				'setting' => $setting,
 			);
 			$addons->view('hooks' .DS. 'cart', $params);
-			
+
 			// add cart
 			$item 	= array(
 				'id'      		=> $result->product->sku,
@@ -1704,13 +1790,13 @@ class dg{
 				'time'    		=> $time,
 				'options' 		=> $result->options,
 			);
-			
+
 			$rowid			= md5($result->product->sku . $time);
-			$cache			= $this->cache('cart');			
-			
+			$cache			= $this->cache('cart');
+
 
 			$designs		= array(
-				'color' => $data['colors'][key($data['colors'])],
+				'color' => (isset($data['colors']) && try_to_count($data['colors']) && isset($data['colors'][key($data['colors'])])) ? $data['colors'][key($data['colors'])] : '',
 				'print' => $print,
 				'cliparts' => $cliparts,
 				'images' => $design['images'],
@@ -1731,15 +1817,15 @@ class dg{
 				$designs['options']	= $data['options'];
 			}
 			$cache->set($rowid, $designs);
-			
-			
+
+
 			$price_product = $result->total->sale / $quantity;
 			$content['product'] = array(
 				'rowid'=> $rowid,
 				'price'=> $price_product,
 				'quantity'=> $quantity,
-				'color_hex' => $data['colors'][key($data['colors'])],
-				'color_title' => $product->design->color_title[key($data['colors'])],
+				'color_hex' => isset($data['colors'][key($data['colors'])]) ? $data['colors'][key($data['colors'])] : '',
+				'color_title' => isset($product->design->color_title[key($data['colors'])]) ? $product->design->color_title[key($data['colors'])] : '',
 				'images'=> json_encode($design['images']),
 				'teams'=> $teams,
 				'options' => $result->options
@@ -1751,7 +1837,7 @@ class dg{
 			if(isset($data['variation_attributes']) && $data['variation_attributes'] != '')
 			{
 				$variation_attributes 	= explode(';', $data['variation_attributes']);
-				for($i=0; $i<count($variation_attributes); $i++)
+				for($i=0; $i<try_to_count($variation_attributes); $i++)
 				{
 					$attr = explode('|', $variation_attributes[$i]);
 					$content['product']['variation'][$attr[0]] = $attr[1];
@@ -1762,10 +1848,10 @@ class dg{
 				$content['product']['color_title'] = $content['product']['color_hex'];
 			}
 		}
-		
+
 		return $content;
 	}
-	
+
 	public function createFile($data, $path, $file, $isIE)
 	{
 		if($isIE == 'true')
@@ -1779,9 +1865,9 @@ class dg{
 			$buffer		= base64_decode($temp[1]);
 			$path_file 	= ROOT .DS. $path .DS. $file .'.png';
 		}
-		
+
 		$path_file	= str_replace('/', DS, $path_file);
-		
+
 		if ( $this->WriteFile($path_file, $buffer) === false)
 		{
 			return '';
@@ -1798,18 +1884,18 @@ class dg{
 			}
 		}
 	}
-	
+
 	public function perpage($width, $height, $proportion)
 	{
 		$width = $width * $proportion['width'];
 		$height = $height * $proportion['height'];
-		
+
 		$pagesW = array('0' => 10.5, '1' => 14.8, '2' => 21.0, '3' => 29.7, '4' => 42, '5' => 59.4, '6' => 84.1);
 		$pagesH = array('0' => 14.8, '1' => 21, '2' => 29.7, '3' => 42, '4' => 59.4, '5' => 84.1, '6' => 118.9);
 
 		if (($width <= $pagesW[0] && $height <= $pagesH[0]) || ($width <= $pagesH[0] && $height <= $pagesW[0]))
 				return 6;
-			
+
 		$size = 6;
 		for($i=1; $i<=6; $i++)
 		{
@@ -1818,10 +1904,10 @@ class dg{
 				return 6 - $i;
 			}
 		}
-			
+
 		return 0;
 	}
-	
+
 	function rgb_to_array($hex)
 	{
 	   $hex = str_replace("#", "", $hex);
@@ -1831,36 +1917,36 @@ class dg{
 		  $r = hexdec(substr($hex,0,1).substr($hex,0,1));
 		  $g = hexdec(substr($hex,1,1).substr($hex,1,1));
 		  $b = hexdec(substr($hex,2,1).substr($hex,2,1));
-	   } 
-	   else 
+	   }
+	   else
 	   {
 		  $r = hexdec(substr($hex,0,2));
 		  $g = hexdec(substr($hex,2,2));
 		  $b = hexdec(substr($hex,4,2));
 	   }
 	   $rgb = array($r, $g, $b);
-	   
+
 	   return $rgb;
 	}
-	
+
 	/*
 	* change color of photo to one color
 	*/
 	public function photoColor($image, $color)
 	{
 		$newColor 		= $this->rgb_to_array($color);
-		
+
 		$img 			= imagecreatefromstring($image);
 
 		$w 			= imagesx($img);
 		$h 			= imagesy($img);
 
 		$rgb = array(255-$newColor[0], 255-$newColor[1], 255-$newColor[2]);
-	
-		imagefilter($img, IMG_FILTER_NEGATE); 
-		imagefilter($img, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]); 
-		imagefilter($img, IMG_FILTER_NEGATE); 
-		
+
+		imagefilter($img, IMG_FILTER_NEGATE);
+		imagefilter($img, IMG_FILTER_COLORIZE, $rgb[0], $rgb[1], $rgb[2]);
+		imagefilter($img, IMG_FILTER_NEGATE);
+
 		imageAlphaBlending($img, true);
 		imageSaveAlpha($img, true);
 		ob_start();
@@ -1871,7 +1957,7 @@ class dg{
 
 		return $data;
 	}
-	
+
 	public function readFile($file)
 	{
 		if ( ! file_exists($file))
@@ -1943,8 +2029,8 @@ class dg{
 // get language
 function lang($key, $string = false, $js = false)
 {
-	$lang = $GLOBALS['lang'];	
-	
+	$lang = $GLOBALS['lang'];
+
 	if ( isset($lang[$key]) )
 	{
 		$txt = $lang[$key];
@@ -1957,13 +2043,13 @@ function lang($key, $string = false, $js = false)
 	{
 		$txt = str_replace("\\'", "&#39;", $txt);
 	}
-	
-	
+
+
 	if($string === false)
 		echo $txt;
 	else
 		return $txt;
-			
+
 }
 
 function frontend_header($addons)
@@ -1992,7 +2078,7 @@ function frontend_header($addons)
 		else
 		{
 			$files 	= $dg->minify_css($addons);
-			for($i=0; $i<count($files); $i++)
+			for($i=0; $i<try_to_count($files); $i++)
 			{
 				echo '<link type="text/css" href="'.$url.$files[$i].'" class="minify-file" rel="stylesheet"/>';
 			}
@@ -2008,7 +2094,7 @@ function frontend_header($addons)
 		else
 		{
 			$files 	= $dg->minify_js($addons);
-			for($i=0; $i<count($files); $i++)
+			for($i=0; $i<try_to_count($files); $i++)
 			{
 				echo '<script type="text/javascript" class="minify-file" src="'.$url.$files[$i].'"></script>';
 			}
@@ -2017,13 +2103,13 @@ function frontend_header($addons)
 	else
 	{
 		$files 	= $dg->minify_css($addons);
-		for($i=0; $i<count($files); $i++)
+		for($i=0; $i<try_to_count($files); $i++)
 		{
 			echo '<link type="text/css" href="'.$url.$files[$i].'" rel="stylesheet"/>';
 		}
 
 		$files 	= $dg->minify_js($addons);
-		for($i=0; $i<count($files); $i++)
+		for($i=0; $i<try_to_count($files); $i++)
 		{
 			echo '<script type="text/javascript" src="'.$url.$files[$i].'"></script>';
 		}
@@ -2039,13 +2125,13 @@ function base_url($url)
 function imageURL($src, $site_url = '')
 {
 	if ($src == '') return '';
-	
+
 	if (strpos($src, 'http') !== false)
 		return $src;
-	
+
 	$url 		= str_replace('//tshirtecommerce', '/tshirtecommerce', $site_url);
 	$temp 		= explode('tshirtecommerce/', $url);
-	
+
 	return $temp[0].'tshirtecommerce/'.$src;
 }
 
@@ -2069,7 +2155,7 @@ function cssShow($data, $key, $default = 1)
 		$value = $data->$key;
 	else
 		$value = $default;
-	
+
 	if ($value == 1)
 		return '';
 	else

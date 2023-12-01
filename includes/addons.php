@@ -40,7 +40,7 @@ class addons extends dg{
 			if (file_exists($file_lang))
 			{		
 				$languages = json_decode(file_get_contents($file_lang));
-				if (count($languages))
+				if (try_to_count($languages))
 				{
 					foreach($languages as $language)
 					{
@@ -63,7 +63,7 @@ class addons extends dg{
 		{
 			if ($langcode != '')
 			{
-				for($i=0; $i<count($files); $i++)
+				for($i=0; $i<try_to_count($files); $i++)
 				{
 					$file = $path . $langcode .DS. $files[$i];
 					if (file_exists($file))
@@ -90,7 +90,7 @@ class addons extends dg{
 			}
 			else
 			{
-				for($i=0; $i<count($files); $i++)
+				for($i=0; $i<try_to_count($files); $i++)
 				{
 					$lang = parse_ini_file($path . $files[$i]);
 					if ($lang === false || $lang == null)
@@ -141,7 +141,7 @@ class addons extends dg{
 		$files 		= $this->getFiles($path, '.css');
 		if ($files !== false)
 		{
-			for($i=0; $i<count($files); $i++)
+			for($i=0; $i<try_to_count($files); $i++)
 			{
 				if($files[$i] == 'addons.min.css') continue;
 				$all_files[] 	= $url.$files[$i];
@@ -170,7 +170,7 @@ class addons extends dg{
 		$files 			= $this->getFiles($path, '.js');
 		if ($files !== false)
 		{
-			for($i=0; $i<count($files); $i++)
+			for($i=0; $i<try_to_count($files); $i++)
 			{
 				if($files[$i] == 'addons.min.js') continue;
 				$all_files[] = $url.$files[$i];
@@ -188,7 +188,7 @@ class addons extends dg{
 		{
 			$files 		= $this->getFiles($path, '.php');
 			if ($files === false) return;
-			for($i=0; $i<count($files); $i++)
+			for($i=0; $i<try_to_count($files); $i++)
 			{
 				include_once($path . $files[$i]);
 			}
@@ -209,7 +209,7 @@ class addons extends dg{
 		
 		if($this->is_mobile == true)
 		{
-			for($i=0; $i<count($files); $i++)
+			for($i=0; $i<try_to_count($files); $i++)
 			{				
 				if(file_exists($path . 'mobile' .DS. $files[$i]))
 				{
@@ -227,7 +227,7 @@ class addons extends dg{
 			if(isset($this->theme_active) && $this->theme_active != '')
 			{
 				$theme = $this->theme_active .DS;
-				for($i=0; $i<count($files); $i++)
+				for($i=0; $i<try_to_count($files); $i++)
 				{
 					if( file_exists($path . $theme . $files[$i] ) )
 					{
@@ -241,7 +241,7 @@ class addons extends dg{
 			}
 			else
 			{
-				for($i=0; $i<count($files); $i++)
+				for($i=0; $i<try_to_count($files); $i++)
 				{
 					include_once($path . $files[$i]);
 				}
@@ -259,7 +259,7 @@ class addons extends dg{
 			if ($content != false && $content != '')
 			{
 				$printings = json_decode($content);				
-				if ( count($printings) )
+				if ( try_to_count($printings) )
 				{
 					foreach ($printings as $printing)
 					{
@@ -290,7 +290,7 @@ class addons extends dg{
 			if ($content != false && $content != '')
 			{
 				$printings = json_decode($content);				
-				if ( count($printings) )
+				if ( try_to_count($printings) )
 				{
 					foreach ($printings as $printing)
 					{
@@ -310,5 +310,4 @@ class addons extends dg{
 		return $data;
 	}
 }
-
 ?>

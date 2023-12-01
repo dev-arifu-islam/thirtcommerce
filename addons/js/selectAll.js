@@ -725,7 +725,7 @@ var showChangeColorAll = function() {
 		});
 	}
 	jQuery(div).append('<div class="buttonFitToArea"><button type="button" class="btn btn-default btn-sm" onclick="design.fitToAreaDesign();"><i class="fa fa-arrows-alt" aria-hidden="true"></i></button></div>');
-	jQuery('#header').prepend(div);
+	jQuery('.labView.active').prepend(div);
 };
 
 var closeChangeColorAll = function() {

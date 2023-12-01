@@ -158,9 +158,10 @@ body{outline:0;min-width:500px;background:none}
 .ui-accordion .ui-accordion-content{border-color:-moz-use-text-color -moz-use-text-color #CCC;border-radius:0;border-style:none none solid;border-width:0 0 1px;color:#666;font-size:12px;overflow:auto;padding:10px;text-align:left;max-height:230px}
 .ui-accordion .ui-accordion-header .ui-accordion-header-icon{margin-top:-8px;position:absolute;right:.5em;top:50%;left:auto}
 #product-details .ps-scrollbar-x-rail{display:none!important}
+#product-details { overflow-x: hidden; }
 .ui-accordion-header:first-child{border-radius:4px 4px 0 0}
 .bg-colors{border:1px solid #CCC;cursor:pointer;float:left;margin-right:6px}
-.product-info{border-bottom:1px dotted #f1f1f1;float:left;margin-bottom:8px;width:100%}
+.product-info{float:left;margin-bottom:8px;width:100%}
 .form-group.product-fields{margin-bottom:8px}
 #product-attributes .list-number{float:left;list-style:none outside none;margin:0;padding:0}
 #product-attributes .list-number li label{margin:0}
@@ -232,12 +233,27 @@ div.dg-tools small{clear:both;display:block}
 .popover.right{z-index:101}
 #dg-cliparts .modal-lg,#dg-design-ideas .modal-lg,#dg-mydesign .modal-lg{width:94%}
 @media screen and (min-width: 770px) {
+#dg-right,#dg-left{display:block!important}
 .dg-options-toolbar{display:none}
 .dg-options-content{display:block}
 .layers-toolbar{display:none}
 .product-btn-info a i{font-size:0}
 }
+@media only screen and (min-width: 770px) and (max-width: 1024px) {
+div#dg-help-functions {
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    width: 100%;
+    height: 34px;
+    top: auto!important;
+}
+#dg-help-functions span.btn{display:inline-block;float:left;margin:0 0 0 -1px;width:auto}
+#dg-help-functions span.btn:first-child{border-radius:4px 0 0 4px;margin:0;padding-bottom:5px}
+#dg-help-functions span.btn:last-child{border-radius:0 4px 4px 0}
+}
 @media only screen and (max-width: 770px) {
+div#dg-help-functions{right:0}
 .modal-header .modal-title{font-size:14px}
 }
 @media screen and (max-width: 770px) {
@@ -378,7 +394,7 @@ div#dg-help-functions{right:0}
 #layers li.layer img {
     height: 24px;
     width: 24px;
-    border: 1px solid #ccc;
+    /*border: 1px solid #ccc;*/
     margin-right: 5px;
 }
 .dropdown-color{border:1px solid #CCC;box-shadow:1px 1px 2px 0 #666;cursor:pointer;float:left;height:22px;line-height:22px;margin:3px;padding-left:2px;padding-top:2px;text-align:center;width:22px}
@@ -412,13 +428,13 @@ input.input-small{font-size:12px;height:18px;text-align:center;width:35px}
 #cacheText > div{float:left;line-height:100%}
 #enter-text{font-size:12px;height:50px}
 #txt-fontfamily{overflow:hidden;white-space:nowrap;width:75%}
-#dg-popover .dropdown{background:none repeat scroll 0 0 #FFF;border:1px solid #9C9D98;border-radius:3px;box-shadow:0 2px 2px #CFD0CB inset,0 2px 2px rgba(0,0,0,0.2);cursor:pointer;display:block;height:28px;padding:.1666em .4375em;position:relative}
+#dg-popover .dropdown{background:none repeat scroll 0 0 #FFF;border:1px solid #ccc;border-radius:3px;cursor:pointer;display:block;height:28px;padding:.1666em .4375em;position:relative}
 #dg-popover .dropdown a{color:#333;font-size:12px;line-height:22px;text-decoration:none}
 #dg-popover .dropdown span{margin-right:-2px;margin-top:3px}
 .clear-line{background-color:#CCC;clear:both;display:block;height:1px;width:100%}
 .clear{clear:both;display:inline-block;height:2px;width:100%}
 .option-outline a.btn{height:23px;line-height:13px;margin-left:4px;margin-top:3px;height:20px;line-height:13px;margin-left:0;margin-top:3px;padding:0 1px;width:19px}
-.dropdown-outline a.dg-outline-value{border:1px solid #CCC;border-radius:4px;box-shadow:0 2px 2px #F1F1F1 inset,0 2px 6px rgba(0,0,0,0.2);color:#333;display:inline-block;float:right;font-size:12px;height:25px;line-height:22px;margin-top:3px;outline:medium none;padding:0 7px;text-decoration:none;width:56px}
+.dropdown-outline a.dg-outline-value{border:1px solid #CCC;border-radius:4px;color:#333;display:inline-block;float:right;font-size:12px;height:25px;line-height:22px;margin-top:3px;outline:medium none;padding:0 7px;text-decoration:none;width:56px}
 .dropdown-outline a.dg-outline-value span.ui-accordion-header-icon{float:right;position:relative;right:-5px;top:3px}
 #dg-shape-width{margin-left:7px;margin-top:7px;width:95%}
 .glyphicons.undo:before,.glyphicons.redo:before{font-size:22px}
@@ -446,12 +462,13 @@ input.input-small{font-size:12px;height:18px;text-align:center;width:35px}
     width: auto;
     overflow: hidden;
     height: 100px;
+    max-width: 100px;
 }
 #dag-files-images .view-thumb img.img-thumbnail {
     max-height: 100%;
     padding: 0;
 }
-.progress.progress-bar-container{border-radius:0 0 3px 3px;bottom:0;margin-bottom:1px;margin-left:1px;position:absolute;width:83.6%}
+.progress.progress-bar-container{border-radius:0 0 3px 3px;bottom:0;margin-bottom:1px;margin-left:1px;position:absolute;width:100%}
 #help-tabs{border:0 none;font-size:12px;margin:0;padding:0}
 #help-tabs .ui-tabs-nav{background:none repeat scroll 0 0 #f2f1f1;border:0 none}
 .carousel{height:500px;overflow:hidden;position:relative;text-align:center;width:100%}
@@ -599,7 +616,7 @@ product-prices .btn {
 .red.glyphicons.remove_2:before{font-size:14px}
 ul.choose_payment label{margin-top:3px}
 ul.choose_payment .description{display:block}
-.table-box-team-list{border-top:1px solid #ccc;margin-top:6px;max-height:350px;overflow:auto;padding-top:10px}
+.table-box-team-list{margin-top:6px;max-height:350px;overflow:auto;padding-top:10px}
 #table-team-list td:first-child{font-size:14px;font-weight:700;line-height:30px}
 #table-team-list td:last-child{line-height:30px}
 .div-box-team-list{max-height:200px;overflow:auto}
@@ -611,9 +628,10 @@ ul.choose_payment .description{display:block}
 #dg-share .modal-header{padding:2px 15px}
 #dg-share .modal-header > h4{display:inline-block;width:50%}
 #dg-share .close{margin-top:10px}
-.box-art{margin:6px;float:left;width:150px;height:150px;text-align:center;position:relative;overflow:hidden;border:1px solid #ddd;border-radius:4px}
+.box-art{margin:6px;float:left;width:calc(16.5% - 15px);height:150px;text-align:center;position:relative;overflow:hidden;border:1px solid #ddd;border-radius:4px}
 .box-art .thumbnail{border:none}
 #list-clipart-colors .dropdown-color.active{outline:2px solid #3580AC}
+.ui-dialog-titlebar.ui-widget-header{background:none;border:0}
 .ui-dialog button.ui-dialog-titlebar-close{background:#EEE url(../images/close.gif) no-repeat top center;border:1px solid #ccc;border-radius:3px;float:left}
 .ui-dialog .ui-dialog-buttonpane{border-top:1px solid #ccc}
 .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset button{color:#fff;background-color:#428bca;border:1px solid #357ebd;display:inline-block;padding:6px 12px;margin-bottom:0;font-size:14px;border-radius:4px}
@@ -639,6 +657,7 @@ ul.choose_payment .description{display:block}
     color: #666;
     background: none;
     font-size: 24px;
+    z-index: 11000;
 }
 #dg-cliparts.store .modal-header{width:100%;background-color:#F1F3FA;border-radius:4px 4px 0 0;position:relative;z-index:2}
 .store div#dag-art-categories{position:fixed;z-index:10;top:auto;height:100%;background-color:#fff;border-right:1px solid #ccc;width:200px;margin-top:-15px;left:2px}
@@ -700,15 +719,13 @@ input#idea-keyword{border-right:0}
     height: 34px;
     margin: 5px 5px 5px 2px;
     width: 34px;
-    border: 0;
-    box-shadow: 0px 0px 4px 0px #ddd;
     border-radius: 3px;
     overflow: hidden;
+    border: 1px solid #999;
 }
 #product-list-colors .bg-colors.active {
     border-radius: 50%;
     overflow: hidden;
-    box-shadow: 0px 0px 4px 0px #007aff;
     position: relative;
 }
 #e-change-product-color{clear:both;display:block;overflow:hidden}
@@ -730,7 +747,7 @@ span.idea-sort{padding-left:8px}
 #dg-design-ideas .modal-header .form-inline{display:inline-block;width:100%}
 #dg-design-ideas .modal-header .form-group{margin-bottom:0;float:left}
 #product-list-colors .bg-colors.bg-more-colors{
-	background: url(../images/more-colors.png);
+    background: url(../images/more-colors.png);
 }
 .list-design-saved .design-box {
     height: 200px;
@@ -752,11 +769,7 @@ div#jsalert {
     padding-left: 15px;
 }
 #layers li.layer.layer-text > span {
-    border: 1px solid #ddd;
-    padding: 4px 6px;
-    width: 170px;
     display: inline-block;
-    background-color: #fff;
     font-size: 12px;
     cursor: text;
 }
@@ -833,6 +846,6 @@ div#jsalert {
 .design-area .drag-item:focus text{
     outline: 1px dashed rgba(0, 0, 0, 0.4)!important;
 }
-#dg-popover .dropdown li.disabled a {
-    opacity: 0.4;
-}
+div#dg-sidebar * { color: #666; }
+div#dg-sidebar * .caret { border-top-color: #666; }
+.open .dropdown-new-zoom { z-index: 1000000; min-width: auto; width: auto;left: unset; }

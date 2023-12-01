@@ -16,7 +16,7 @@ if ( empty($settings['themes']) )
 	$settings['themes'] = '';
 ?>
 
-<?php if ( $themes != false && count($themes) > 0) { ?>
+<?php if ( $themes != false && try_to_count($themes) > 0) { ?>
 
 	<h4><?php lang('settings_themes'); ?></h4>
 	<p class="help-block"><?php lang('settings_themes_description'); ?></p>

@@ -1,20 +1,11 @@
-/**
- * @author tshirtecommerce - www.tshirtecommerce.com
- * @date: 2016-03-09
- * 
- * @copyright  Copyright (C) 2015 tshirtecommerce.com. All rights reserved.
- * @license    GNU General Public License version 2 or later; see LICENSE
- *
- */
-  
 jQuery('#price-type-color-tab').tab('show');
 
 function printings_view_change( e ) {
 	var value = jQuery( e ).val(),
 		type = jQuery('#printing-form input[type="radio"]:checked').val();
-	if ( value == 0 ) { // No
+	if ( value == 0 ) {
 		jQuery('#price-type-' + type + '-tab ul.nav-tabs').addClass('hidden');
-	} else { 			// Yes
+	} else {
 		jQuery('#price-type-' + type + '-tab ul.nav-tabs').removeClass('hidden');
 	}
 }
@@ -26,10 +17,10 @@ function printings_change_number_color( e ) {
 		right_table = '#color-view-right table',
 		back_table  = '#color-view-back table';
 
-	printings_change_table_column( front_table, column, 'front' );	// for front view
-	printings_change_table_column( left_table,  column, 'left' );	// for left view
-	printings_change_table_column( right_table, column, 'right' );	// for right view
-	printings_change_table_column( back_table,  column, 'back' );	// for back view
+	printings_change_table_column( front_table, column, 'front' );
+	printings_change_table_column( left_table,  column, 'left' );
+	printings_change_table_column( right_table, column, 'right' );
+	printings_change_table_column( back_table,  column, 'back' );
 }
 
 function printings_change_table_column( table, column, view ) {
@@ -37,7 +28,7 @@ function printings_change_table_column( table, column, view ) {
 	
 	var type = jQuery('#printing-form input[type="radio"]:checked').val();
 	
-	if ( col < column ) { // Add column
+	if ( col < column ) {
 		for ( i = col + 1; i <= column; i++ ) {
 			var th_col = '<th class="th-' + i + ' center">' + i + '</th>';
 			

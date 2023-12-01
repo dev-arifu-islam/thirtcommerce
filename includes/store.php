@@ -59,7 +59,7 @@ class store{
 		if($used != '')
 		{
 			$array = explode(';', $used);
-			if(count($array))
+			if(try_to_count($array))
 			{
 				foreach($array as $index)
 				{
@@ -116,7 +116,7 @@ class store{
 	*/
 	public function setSearch($options)
 	{
-		if(count($options))
+		if(try_to_count($options))
 		{	
 			$time 		= time();
 			$month 		= date('Y_m', $time);
@@ -269,7 +269,8 @@ class store{
 		{
 			$exchange_rate = 1;
 		}
-		$price = $price * $exchange_rate;
+		if(is_numeric($exchange_rate))
+			$price = $price * $exchange_rate;
 		
 		$str = number_format($price, $number);
 		
@@ -308,11 +309,11 @@ class store{
 		$ids = array($id);
 		
 		$categories = $this->getCategories();
-		if(count($categories))
+		if(try_to_count($categories))
 		{
 			foreach($categories as $cate)
 			{
-				if ($cate['id'] == $id && isset($cate['children']) && count($cate['children']) > 0)
+				if ($cate['id'] == $id && isset($cate['children']) && try_to_count($cate['children']) > 0)
 				{
 					foreach($cate['children'] as $children)
 					{
@@ -328,7 +329,7 @@ class store{
 	
 	function sortData($data, $sort = 'featured', $type = 'arts')
 	{
-		if (count($data) == 0) return $data;
+		if (try_to_count($data) == 0) return $data;
 		// get data from cache
 		//$cache 		= $this->dg->cache('store');
 		//$arts 		= $cache->get($type.'_'.$sort);
@@ -464,8 +465,26 @@ class store{
 				$arts		= $this->sortData($info, $options['sort']);
 			}
 			
-			if(count($arts))
+			if(try_to_count($arts))
 			{
+				/*check clipart removed*/
+				$del 	= $this->path.'deleted.json';
+				if(file_exists($del))
+				{
+					$temps = array();
+					$deleted = json_decode(file_get_contents($del), true);
+					if (try_to_count($deleted) && isset($deleted['art']) && try_to_count($deleted['art']) && try_to_count($arts)) 
+					{
+						foreach ($arts as $key => $art) 
+						{
+							if (!in_array($art['id'], $deleted['art'])) {
+								$temps[] = $art;
+							}
+						}
+						$arts = $temps;
+					}
+				}
+				
 				// find categories
 				if ( isset($options['cate_id']) && $options['cate_id'] > 0)
 				{
@@ -493,7 +512,7 @@ class store{
 				$n = $start + 30;
 				$i = 0;
 				$number = 0;
-				$total 	= count($arts);
+				$total 	= try_to_count($arts);
 				while($number < $n)
 				{
 					if ($i >= $total) break;
@@ -537,7 +556,7 @@ class store{
 						if ( isset($keyword) )
 						{	
 							// find with tags
-							if (array_search($keyword, $info[$id]['tags']) === false)
+							if ((isset($info[$id]) && isset($info[$id]['tags']) && array_search($keyword, $info[$id]['tags']) === false) || empty($info[$id]['tags']))
 							{
 								// find title
 								if (strpos(strtolower($info[$id]['title']), $keyword) === false)
@@ -571,11 +590,13 @@ class store{
 						$info[$id]['prices'] 	= $info[$id]['price'];
 						
 						$is_shop = false;
-						if(isset($info[$id]['is_shop']) && $info[$id]['is_shop'] == 0 && isset($info[$id]['fle_url']))
+						if(isset($info[$id]['is_shop']))
 						{
 							$is_shop = true;
-							//$info[$id]['thumb'] = $info[$id]['fle_url'].$info[$id]['thumb'];
-							$info[$id]['medium'] = $info[$id]['fle_url'].$info[$id]['medium'];
+							if (isset($info[$id]['fle_url'])) {
+								//$info[$id]['thumb'] = $info[$id]['fle_url'].$info[$id]['thumb'];
+								$info[$id]['medium'] = $info[$id]['fle_url'].$info[$id]['medium'];
+							}
 						}
 						$info[$id]['price'] 	= $this->setPrice($info[$id]['price'], $is_shop);
 						$data[$i] = $info[$id];
@@ -603,7 +624,7 @@ class store{
 		$histories 	= $cache->get('keyword_'.$month);
 		
 		$keyword 	= array();
-		if(count((array)$histories))
+		if(try_to_count((array)$histories))
 		{
 			for($i=0; $i<=$today; $i++)
 			{
@@ -629,7 +650,7 @@ class store{
 			return $b['count'] - $a['count'];
 		}
 		
-		if(count($keyword))
+		if(try_to_count($keyword))
 		{
 			usort($keyword, 'cmp');
 			
@@ -655,7 +676,7 @@ class store{
 		{
 			$used 		= $_COOKIE['user_'.$type];
 			$ids 		= explode(';', $used);
-			if(count($ids) > 0)
+			if(try_to_count($ids) > 0)
 			{
 				foreach($ids as $id)
 				{
@@ -793,7 +814,7 @@ class store{
 	{
 		$products 		= $this->dg->getProducts();
 		
-		if(count($products) && $product_id > 0)
+		if(try_to_count($products) && $product_id > 0)
 		{
 			foreach($products as $product)
 			{
@@ -815,7 +836,7 @@ class store{
 		if(isset($categories) && isset($types))
 		{
 			// find categoreis
-			if(count($rows_categories))
+			if(try_to_count($rows_categories))
 			{
 				$rows 	= array();
 				$i 		= 0;
@@ -831,7 +852,7 @@ class store{
 						);
 						
 						$childrens		= array();
-						if( isset($row['children']) && count($row['children']) > 0 )
+						if( isset($row['children']) && try_to_count($row['children']) > 0 )
 						{						
 							foreach($row['children'] as $child)
 							{
@@ -841,7 +862,7 @@ class store{
 								}
 							}
 						}
-						if(count($childrens))
+						if(try_to_count($childrens))
 						{
 							$rows[$row['id']]['children']	= $childrens;
 						}
@@ -849,7 +870,7 @@ class store{
 					else
 					{
 						$childrens		= array();
-						if( isset($row['children']) && count($row['children']) > 0 )
+						if( isset($row['children']) && try_to_count($row['children']) > 0 )
 						{					
 							foreach($row['children'] as $child)
 							{
@@ -859,7 +880,7 @@ class store{
 								}
 							}
 						}
-						if(count($childrens))
+						if(try_to_count($childrens))
 						{
 							$rows[$row['id']]	= array(
 								'id'			=> $row['id'],
@@ -880,12 +901,12 @@ class store{
 			$ids1 			= array();
 			
 			// find design ideas with categories
-			if( count($categories) > 0 )
+			if( try_to_count($categories) > 0 )
 			{
 				$cate_ideas 	= $this->getData('cate_ideas');
 				foreach($categories as $cate_id)
 				{
-					if( isset($cate_ideas[$cate_id]) && count($cate_ideas[$cate_id]) > 0 )
+					if( isset($cate_ideas[$cate_id]) && try_to_count($cate_ideas[$cate_id]) > 0 )
 					{
 						foreach( $cate_ideas[$cate_id] as $id )
 						{
@@ -899,12 +920,12 @@ class store{
 			}
 			
 			// find with type
-			if( count($types) > 0 )
+			if( try_to_count($types) > 0 )
 			{
 				$ideas_types 	= $this->getData('ideas_types');
 				foreach($types as $type_id)
 				{
-					if( isset($ideas_types[$type_id]) && count($ideas_types[$type_id]) > 0 )
+					if( isset($ideas_types[$type_id]) && try_to_count($ideas_types[$type_id]) > 0 )
 					{
 						foreach( $ideas_types[$type_id] as $id )
 						{
@@ -918,7 +939,7 @@ class store{
 			}
 		}
 		$categories = array();
-		if(count($rows_categories))
+		if(try_to_count($rows_categories))
 		{
 			$sort_index_1 = 0;
 			foreach($rows_categories as &$cate)
@@ -926,7 +947,7 @@ class store{
 				$cate['sort'] = $sort_index_1;
 				$categories[$cate['id']] = $cate;
 				$sort_index_2 = 0;
-				if( isset($cate['children']) && count($cate['children']) )
+				if( isset($cate['children']) && try_to_count($cate['children']) )
 				{
 					$childrens = array();
 					foreach($cate['children'] as $id => &$children)
@@ -943,7 +964,7 @@ class store{
 		
 		$rows = $this->getData('ideas');
 		
-		if(isset($ids) && isset($ids1) && count($rows))
+		if(isset($ids) && isset($ids1) && try_to_count($rows))
 		{
 			$ideas = array();
 			foreach($rows as $id => $idea)
@@ -958,7 +979,7 @@ class store{
 
 		$data = array(
 			'categories'	=> $categories,
-			'count'			=> count($rows),
+			'count'			=> try_to_count($rows),
 			'rows'			=> $rows,
 		);
 		return $data;
@@ -969,19 +990,19 @@ class store{
 	*/
 	public function ideas($data, $options)
 	{
-		if(count($data['rows']) == 0) return $data;
+		if(try_to_count($data['rows']) == 0) return $data;
 		
 		$rows	= $data['rows'];
 		
 		
-		if(count($rows))
+		if(try_to_count($rows))
 		{
 			// get all design of client viewed
 			if(isset($options['viewed']) && $options['viewed'] == 1 && isset($_COOKIE['user_ideas']))
 			{
 				$used 		= $_COOKIE['user_ideas'];
 				$ids 		= explode(';', $used);
-				if(count($ids))
+				if(try_to_count($ids))
 				{
 					foreach($rows as $id => $row)
 					{
@@ -994,12 +1015,12 @@ class store{
 			}
 			
 			// find idea with categories
-			if(isset($options['cate_id']) && $options['cate_id'] > 0 && count($rows) > 0)
+			if(isset($options['cate_id']) && $options['cate_id'] > 0 && try_to_count($rows) > 0)
 			{
 				$cate_id	= $options['cate_id'];
 				$cate_ids 	= array();
 				$cate_ids[]	= $cate_id;
-				if( isset($data['categories'][$cate_id]) && isset($data['categories'][$cate_id]['children']) && count($data['categories'][$cate_id]['children']) > 0 )
+				if( isset($data['categories'][$cate_id]) && isset($data['categories'][$cate_id]['children']) && try_to_count($data['categories'][$cate_id]['children']) > 0 )
 				{
 					foreach($data['categories'][$cate_id]['children'] as $children)
 					{
@@ -1012,9 +1033,9 @@ class store{
 				$cate_ideas 	= $this->getData('cate_ideas');
 
 				$ids = array();
-				for( $i=0; $i<count($cate_ids); $i++ )
+				for( $i=0; $i<try_to_count($cate_ids); $i++ )
 				{
-					if( isset($cate_ideas[$cate_ids[$i]]) && count($cate_ideas[$cate_ids[$i]]) )
+					if( isset($cate_ideas[$cate_ids[$i]]) && try_to_count($cate_ideas[$cate_ids[$i]]) )
 					{
 						foreach ( $cate_ideas[$cate_ids[$i]] as $idea_id)
 						{
@@ -1036,7 +1057,7 @@ class store{
 			}
 			
 			// search keyword
-			if(isset($options['keyword']) && $options['keyword'] != '' && count($rows) > 0)
+			if(isset($options['keyword']) && $options['keyword'] != '' && try_to_count($rows) > 0)
 			{			
 				$ideas 		= array();
 				$keyword	= trim(strtolower($options['keyword']));
@@ -1054,7 +1075,7 @@ class store{
 						$row['index']	= strpos($description, $keyword);
 						$ideas[$id]		= $row;
 					}
-					elseif( isset($row['tags']) && count($row['tags']) )
+					elseif( isset($row['tags']) && try_to_count($row['tags']) )
 					{
 						foreach($row['tags'] as $tag)
 						{
@@ -1077,7 +1098,7 @@ class store{
 			}
 			
 			// search designer
-			if(isset($options['designer']) && $options['designer'] > 0 && count($rows) > 0)
+			if(isset($options['designer']) && $options['designer'] > 0 && try_to_count($rows) > 0)
 			{
 				$ideas 		= array();
 				foreach($rows as $id => $row)
@@ -1091,13 +1112,13 @@ class store{
 			}
 			
 			// search tags
-			if(isset($options['tags']) && $options['tags'] != '' && count($rows) > 0)
+			if(isset($options['tags']) && $options['tags'] != '' && try_to_count($rows) > 0)
 			{
 				$ideas 		= array();
 				$keyword	= trim(strtolower($options['tags']));
 				foreach($rows as $id => $row)
 				{
-					if( isset($row['tags']) && count($row['tags']) )
+					if( isset($row['tags']) && try_to_count($row['tags']) )
 					{
 						foreach($row['tags'] as $tag)
 						{
@@ -1114,12 +1135,12 @@ class store{
 			}
 		}
 		
-		if(count($rows) > 0 && isset($options['sort']))
+		if(try_to_count($rows) > 0 && isset($options['sort']))
 		{
 			$rows				= $this->sortData($rows, $options['sort'], 'ideas');
 		}
 		$data['rows']		= $rows;
-		$data['count']		= count($rows);
+		$data['count']		= try_to_count($rows);
 		
 		return $data; 
 	}
